@@ -1,7 +1,3 @@
-This code is a sophisticated **web-based calculator and planner** designed specifically for the popular strategy game **Travian: Legends**. It helps players determine the **optimal build order** for resource fields and production buildings in a village to maximize resource output based on various parameters (village type, tribe, gold bonus, desired level, and resource weight prioritization).
-
-Here is a comprehensive `README.md` file based on your HTML/JavaScript code:
-
 # 🏰 Travian Planner 8.6
 
 An advanced, browser-based resource and building planner for the strategy game **Travian: Legends**. This tool uses an optimization algorithm to calculate the most cost-effective development path (best Return on Investment or ROI) for a village, prioritizing field upgrades and production buildings based on user-defined weights and settings.
