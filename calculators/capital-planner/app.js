@@ -5,7 +5,7 @@
 // --- ENGINE SECTION ---
 const CONSTANTS = {
     TRIBE_EGYPT_BONUS: 0.05,
-    FACTORY_BONUS: 0.05
+    FACTORY_BONUS: 0.05 // 5% per level
 };
 
 const TEMPLATES = {
@@ -35,6 +35,7 @@ class TravianEngine {
         return {
             wood: Array(tpl.w).fill(0), clay: Array(tpl.c).fill(0),
             iron: Array(tpl.i).fill(0), crop: Array(tpl.cr).fill(0),
+            // These keys must match the 'id' in the factories array
             sawmill: 0, brickyard: 0, foundry: 0, mill: 0, bakery: 0,
             waterworks: 0, oasisActive: 0, hm: 0
         };
@@ -81,7 +82,6 @@ class TravianEngine {
         if (action.type === 'field') {
             const lvl = stateCopy[action.res][action.idx];
             if (lvl < this.config.maxLevel) {
-                // Map generic resource types to specific DB names [cite: 1]
                 const dbNameMap = { wood: "Woodcutter", clay: "Clay Pit", iron: "Iron Mine", crop: "Cropland" };
                 const c = getBuildingCost(dbNameMap[action.res], lvl + 1);
                 if (c) {
@@ -91,14 +91,16 @@ class TravianEngine {
                 }
             }
         } else if (action.type === 'building') {
-            const lvl = stateCopy[action.name];
+            // FIX: Use action.key to update state (e.g. 'mill')
+            // Use action.name to lookup DB (e.g. 'Grain Mill')
+            const lvl = stateCopy[action.key];
             const db = BUILDING_DB[action.name];
-            // Check max level from DB (usually 5 for factories) [cite: 2]
+            
             if (lvl < db.max) {
                 const c = getBuildingCost(action.name, lvl + 1);
                 if (c) {
                     cost = c.total;
-                    stateCopy[action.name]++;
+                    stateCopy[action.key]++; // BUG FIX: Correctly increment state
                     valid = true;
                 }
             }
@@ -148,7 +150,7 @@ class TravianEngine {
             let bestMove = { roi: Infinity };
             let bestAction = null;
 
-            // 1. Evaluate All Fields (find best ROI among fields)
+            // 1. Evaluate All Fields
             ['wood', 'clay', 'iron', 'crop'].forEach(res => {
                 const arr = this.state[res];
                 if(arr.length === 0) return;
@@ -162,7 +164,7 @@ class TravianEngine {
                 }
             });
 
-            // 2. Evaluate Buildings (if enabled in config)
+            // 2. Evaluate Buildings (FIXED)
             const factories = [
                 { id: 'sawmill', db: 'Sawmill', reqField: 'wood', reqLvl: 10, enabled: this.config.useSawmill },
                 { id: 'brickyard', db: 'Brickyard', reqField: 'clay', reqLvl: 10, enabled: this.config.useBrickyard },
@@ -173,7 +175,7 @@ class TravianEngine {
             ];
 
             factories.forEach(f => {
-                if (!f.enabled) return; // SKIP if unchecked
+                if (!f.enabled) return;
 
                 // Prerequisite Checks
                 if (f.reqField) {
@@ -185,16 +187,16 @@ class TravianEngine {
                 }
                 if (f.tribe && this.config.tribe !== f.tribe) return;
 
-                const result = this.evaluateUpgrade({ type: 'building', name: f.db }, currentMetrics.total);
+                // BUG FIX: Pass f.id as 'key' so evaluateUpgrade knows what state var to update
+                const result = this.evaluateUpgrade({ type: 'building', name: f.db, key: f.id }, currentMetrics.total);
                 
-                // Compare Building ROI vs Field ROI
                 if (result.roi < bestMove.roi) {
                     bestMove = result;
                     bestAction = { type: 'building', name: f.db, lvl: this.state[f.id] + 1, sortKey: f.id };
                 }
             });
 
-            // 3. Evaluate Oasis (if available)
+            // 3. Evaluate Oasis
             if (this.state.oasisActive < 3 && Object.keys(this.config.oases[this.state.oasisActive]).length > 0) {
                  const result = this.evaluateUpgrade({ type: 'oasis' }, currentMetrics.total);
                  if (result.roi < bestMove.roi) {
@@ -205,7 +207,6 @@ class TravianEngine {
 
             if (bestMove.roi === Infinity) break;
 
-            // Apply best move
             this.state = bestMove.newState;
             totalSpent += bestMove.cost;
             
@@ -213,7 +214,7 @@ class TravianEngine {
                 step: step + 1,
                 desc: this.formatActionDesc(bestAction),
                 type: bestAction.sortKey, 
-                lvl: bestAction.lvl, // Target Level
+                lvl: bestAction.lvl, 
                 prod: Math.round(bestMove.prod),
                 cost: bestMove.cost,
                 totalSpent: totalSpent,
@@ -225,11 +226,7 @@ class TravianEngine {
     }
 
     formatActionDesc(action) {
-        // Fallback method - visuals handled by renderTable
-        if (action.type === 'field') return `Upgrade ${action.name} to ${action.lvl}`;
-        if (action.type === 'building') return `Build ${action.name} to ${action.lvl}`;
-        if (action.type === 'oasis') return `Conquer Oasis`;
-        return 'Action';
+        return ""; // Visuals handled by renderTable
     }
 }
 
@@ -263,7 +260,6 @@ const UI = {
     },
 
     calculateMain: function() {
-        // Gather all inputs including new checkboxes
         const config = {
             villageType: document.getElementById('villageType').value,
             tribe: document.getElementById('tribe').value,
@@ -271,7 +267,6 @@ const UI = {
             goldBonus: parseFloat(document.getElementById('goldBonus').value),
             oases: [this.getOasisVal('oasis1'), this.getOasisVal('oasis2'), this.getOasisVal('oasis3')],
             
-            // New Building Flags
             useSawmill: document.getElementById('useSawmill').checked,
             useBrickyard: document.getElementById('useBrickyard').checked,
             useFoundry: document.getElementById('useFoundry').checked,
@@ -332,14 +327,13 @@ const UI = {
         const container = document.getElementById('output-grouped');
         container.innerHTML = '';
         const table = document.createElement('table');
-        // Translated Headers
         table.innerHTML = `<thead><tr><th class="col-type">Type</th><th class="col-action">Action</th><th class="col-prod">Hourly Prod.</th><th class="col-status">Village State</th></tr></thead><tbody></tbody>`;
         const tbody = table.querySelector('tbody');
 
         if(steps.length === 0) return;
 
         // --- GROUPING LOGIC ---
-        let group = { ...steps[1], count: 1 }; // Start at step 1 (skip step 0)
+        let group = { ...steps[1], count: 1 }; 
 
         const flushGroup = (g) => {
             const tr = document.createElement('tr');
@@ -353,7 +347,7 @@ const UI = {
             else if(['crop','mill','bakery'].includes(g.type)) { theme = 'theme-crop'; label = 'CROP'; }
             else if(g.type === 'oasis') { theme = 'theme-special'; label = 'OASIS'; }
 
-            // Action Description (Translated)
+            // ENGLISH Descriptions
             let actionText = "";
             const mapName = {
                 wood: 'Woodcutter', clay: 'Clay Pit', iron: 'Iron Mine', crop: 'Cropland',
@@ -378,11 +372,10 @@ const UI = {
 
         for (let i = 2; i < steps.length; i++) {
             const s = steps[i];
-            // Group if: same type AND same target level
             if (s.type === group.type && s.lvl === group.lvl && ['wood','clay','iron','crop'].includes(s.type)) {
                 group.count++;
-                group.prod = s.prod; // Use latest production
-                group.state = s.state; // Use latest state
+                group.prod = s.prod; 
+                group.state = s.state; 
             } else {
                 flushGroup(group);
                 group = { ...s, count: 1 };
