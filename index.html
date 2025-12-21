@@ -2,155 +2,44 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <title>Travian ROI Planner</title>
+    <title>Travian Tools Collection</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Vollkorn:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Vollkorn:wght@400;700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
+    <style>
+        /* Specific styles for the Hub Menu */
+        .hub-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; margin-top: 30px; }
+        .tool-card {
+            background: white; border: 1px solid #c9b7a2; border-radius: 8px; padding: 25px;
+            transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; text-decoration: none; color: inherit;
+            display: block;
+        }
+        .tool-card:hover { transform: translateY(-5px); box-shadow: 0 8px 15px rgba(0,0,0,0.1); border-color: #859f51; }
+        .tool-icon { font-size: 2.5rem; margin-bottom: 15px; display: block; }
+        .tool-title { font-family: 'Vollkorn', serif; font-size: 1.25rem; font-weight: 700; margin-bottom: 10px; color: #4a2d1e; }
+        .tool-desc { font-family: 'Roboto', sans-serif; font-size: 0.9rem; color: #666; line-height: 1.5; }
+    </style>
 </head>
 <body>
+    <div class="container">
+        <h1>Travian Tools Collection</h1>
+        <p style="text-align: center; color: #666;">Seleziona uno strumento per iniziare.</p>
+        
+        <div class="hub-grid">
+            <a href="calculators/capital-planner/" class="tool-card">
+                <span class="tool-icon">🏛️</span>
+                <div class="tool-title">Sviluppo Capitale (ROI)</div>
+                <div class="tool-desc">
+                    Calcola l'ordine di costruzione matematicamente perfetto per massimizzare la produzione del tuo villaggio.
+                </div>
+            </a>
 
-<div class="container">
-    <h1>Travian ROI Planner (Math Only)</h1>
-    
-    <div id="view-calc" class="view-section active">
-        <div class="controls-grid">
-            <div class="control-section">
-                <h3 class="section-title">Impostazioni Villaggio</h3>
-                <div class="control-group">
-                    <label>Layout Campi</label>
-                    <select id="villageType">
-                        <option value="4446">4-4-4-6 (Standard)</option>
-                        <option value="11115">1-1-1-15 (15 Grani)</option>
-                        <option value="3339">3-3-3-9 (9 Grani)</option>
-                        <option value="4437">4-4-3-7 (7 Grani)</option>
-                    </select>
-                </div>
-                <div class="control-group">
-                    <label>Tribù</label>
-                    <select id="tribe">
-                        <option value="generic">Galli/Teutoni/Romani</option>
-                        <option value="egyptian">Egizi (Bonus Acquedotto)</option>
-                    </select>
-                </div>
-                <div class="control-group">
-                    <label>Max Livello</label>
-                    <input type="number" id="maxLevel" value="18" min="1" max="21">
-                </div>
-                 <div class="control-group">
-                    <label>Bonus Gold (+25%)</label>
-                    <select id="goldBonus">
-                        <option value="1.25">Attivo</option>
-                        <option value="1.0">Disattivato</option>
-                    </select>
-                </div>
+            <div class="tool-card" style="opacity: 0.6; cursor: default;">
+                <span class="tool-icon">⚔️</span>
+                <div class="tool-title">Simulatore Truppe</div>
+                <div class="tool-desc">In arrivo...</div>
             </div>
-
-            <div class="control-section">
-                <h3 class="section-title">Oasi Disponibili</h3>
-                <div class="control-group">
-                    <label>Oasi 1</label>
-                    <select id="oasis1">
-                        <option value="none">Nessuna</option>
-                        <option value="wood-0.25">Legno 25%</option>
-                        <option value="clay-0.25">Argilla 25%</option>
-                        <option value="iron-0.25">Ferro 25%</option>
-                        <option value="crop-0.25">Grano 25%</option>
-                        <option value="crop-0.50">Grano 50%</option>
-                    </select>
-                </div>
-                <div class="control-group">
-                    <label>Oasi 2</label>
-                    <select id="oasis2">
-                        <option value="none">Nessuna</option>
-                        <option value="wood-0.25">Legno 25%</option>
-                         <option value="crop-0.25">Grano 25%</option>
-                    </select>
-                </div>
-                <div class="control-group">
-                    <label>Oasi 3</label>
-                    <select id="oasis3">
-                        <option value="none">Nessuna</option>
-                        <option value="crop-0.25">Grano 25%</option>
-                        <option value="crop-0.50">Grano 50%</option>
-                    </select>
-                </div>
-            </div>
-        </div>
-
-        <div class="action-area">
-            <button type="button" class="calc-button" onclick="calculate()">Calcola Percorso Migliore (ROI)</button>
-        </div>
-
-        <div id="results-area">
-             <div class="stats-box">
-                <div class="stat-item">
-                    <span class="stat-label">Produzione Finale</span>
-                    <span class="stat-value" id="final-prod">0</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">Costo Totale</span>
-                    <span class="stat-value" id="final-cost">0</span>
-                </div>
-            </div>
-            <table id="output-table">
-                <thead>
-                    <tr>
-                        <th>Step</th>
-                        <th>Azione Consigliata</th>
-                        <th>Prod. Oraria</th>
-                        <th>Costo</th>
-                        <th>ROI (Ore)</th>
-                    </tr>
-                </thead>
-                <tbody id="output-body"></tbody>
-            </table>
         </div>
     </div>
-</div>
-
-<script src="js/data.js"></script>
-<script src="js/engine.js"></script>
-<script>
-    function getOasisVal(id) {
-        const val = document.getElementById(id).value;
-        if(val === 'none') return {};
-        const [type, num] = val.split('-');
-        return { [type]: parseFloat(num) };
-    }
-
-    function calculate() {
-        const config = {
-            villageType: document.getElementById('villageType').value,
-            tribe: document.getElementById('tribe').value,
-            maxLevel: parseInt(document.getElementById('maxLevel').value),
-            goldBonus: parseFloat(document.getElementById('goldBonus').value),
-            oases: [getOasisVal('oasis1'), getOasisVal('oasis2'), getOasisVal('oasis3')]
-        };
-
-        const engine = new TravianEngine(config);
-        const result = engine.runSimulation();
-
-        // Render Results
-        const tbody = document.getElementById('output-body');
-        tbody.innerHTML = '';
-        
-        if(result.steps.length > 0) {
-            document.getElementById('final-prod').innerText = result.steps[result.steps.length-1].prod.toLocaleString();
-            document.getElementById('final-cost').innerText = result.totalSpent.toLocaleString();
-        }
-
-        result.steps.forEach(row => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td>${row.step}</td>
-                <td style="font-weight:bold; color:#4a2d1e;">${row.desc}</td>
-                <td>${row.prod.toLocaleString()}</td>
-                <td>${row.cost.toLocaleString()}</td>
-                <td style="color:${row.roi < 100 ? 'green' : 'orange'}">${row.roi}h</td>
-            `;
-            tbody.appendChild(tr);
-        });
-    }
-</script>
 </body>
 </html>

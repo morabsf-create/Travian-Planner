@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>Sviluppo Capitale - Travian Tools</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Vollkorn:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+
+<div class="container">
+    <div style="margin-bottom: 20px;">
+        <a href="../../index.html" style="text-decoration: none; color: #859f51; font-weight: bold;">&larr; Torna alla Home</a>
+    </div>
+
+    <h1>Sviluppo Capitale (ROI)</h1>
+    
+    <div class="nav-tabs">
+        <div class="nav-tab active" onclick="UI.setTab('calc')">📝 Pianificatore</div>
+        <div class="nav-tab" onclick="UI.setTab('chart')">📊 Analisi Grafica</div>
+    </div>
+
+    <div id="view-calc" class="view-section active">
+        <div class="controls-grid">
+            <div class="control-section var-a">
+                <h3 class="section-title">Parametri Villaggio</h3>
+                <div class="control-group">
+                    <label>Layout Campi</label>
+                    <select id="villageType">
+                        <option value="4446">4-4-4-6 (Standard)</option>
+                        <option value="11115">1-1-1-15 (15 Grani)</option>
+                        <option value="3339">3-3-3-9 (9 Grani)</option>
+                        <option value="4437">4-4-3-7 (7 Grani)</option>
+                        <option value="3447">3-4-4-7 (7 Grani)</option>
+                        <option value="4347">4-3-4-7 (7 Grani)</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label>Max Livello</label>
+                    <div class="range-wrapper">
+                        <input type="range" id="maxLevelRange" min="1" max="21" value="18" oninput="document.getElementById('maxLevel').value=this.value">
+                        <input type="number" id="maxLevel" value="18" min="1" max="21" class="range-value" style="width:50px; border:none; background:transparent;" readonly>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label>Tribù</label>
+                    <select id="tribe">
+                        <option value="generic">Standard (Romani/Galli/Teutoni)</option>
+                        <option value="egyptian">Egizi (Bonus Acquedotto)</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label>Bonus Gold (+25%)</label>
+                    <select id="goldBonus">
+                        <option value="1.25">Attivo</option>
+                        <option value="1.0">Disattivato</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="control-section var-b">
+                <h3 class="section-title">Oasi Conquistabili</h3>
+                <div class="control-group">
+                    <label>Oasi 1</label>
+                    <select id="oasis1">
+                        <option value="none">Nessuna</option>
+                        <option value="crop-0.25">🌾 Grano 25%</option>
+                        <option value="crop-0.50">🌾 Grano 50%</option>
+                        <option value="wood-0.25">🌲 Legno 25%</option>
+                        <option value="clay-0.25">🧱 Argilla 25%</option>
+                        <option value="iron-0.25">⚒️ Ferro 25%</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label>Oasi 2</label>
+                    <select id="oasis2">
+                        <option value="none">Nessuna</option>
+                        <option value="crop-0.25">🌾 Grano 25%</option>
+                        <option value="wood-0.25">🌲 Legno 25%</option>
+                        <option value="clay-0.25">🧱 Argilla 25%</option>
+                        <option value="iron-0.25">⚒️ Ferro 25%</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label>Oasi 3</label>
+                    <select id="oasis3">
+                        <option value="none">Nessuna</option>
+                        <option value="crop-0.25">🌾 Grano 25%</option>
+                        <option value="crop-0.50">🌾 Grano 50%</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="action-area">
+            <button type="button" class="calc-button" onclick="UI.calculateMain()">Calcola Percorso Ottimale</button>
+        </div>
+
+        <div id="results-area" style="display:none;">
+            <div class="stats-box">
+                <div class="stat-item"><span class="stat-label">Prod. Oraria</span><span class="stat-value" id="final-prod">0</span></div>
+                <div class="stat-item"><span class="stat-label">Costo Totale</span><span class="stat-value" id="final-cost">0</span></div>
+                <div class="stat-item"><span class="stat-label">ROI Finale</span><span class="stat-value" id="final-roi">0h</span></div>
+            </div>
+            <div class="collapsible-header">Ordine di Sviluppo</div>
+            <div class="collapsible-content">
+                <div class="table-responsive" id="output-grouped"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="view-chart" class="view-section">
+        <div class="chart-container">
+            <canvas id="analysisChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<script src="../../js/data.js"></script>
+<script src="app.js"></script>
+
+</body>
+</html>
