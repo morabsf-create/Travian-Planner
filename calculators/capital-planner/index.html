@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Sviluppo Capitale - Travian Tools</title>
+    <title>Capital Development - Travian Tools</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Vollkorn:wght@400;700&display=swap" rel="stylesheet">
     
@@ -14,134 +14,134 @@
 
 <div class="container">
     <div style="margin-bottom: 20px;">
-        <a href="../../index.html" style="text-decoration: none; color: #859f51; font-weight: bold;">&larr; Torna alla Home</a>
+        <a href="../../index.html" style="text-decoration: none; color: #859f51; font-weight: bold;">&larr; Back to Hub</a>
     </div>
 
-    <h1>Sviluppo Capitale (ROI)</h1>
+    <h1>Capital Development (ROI)</h1>
     
     <div class="nav-tabs">
-        <div class="nav-tab active" onclick="UI.setTab('calc')">📝 Pianificatore</div>
-        <div class="nav-tab" onclick="UI.setTab('chart')">📊 Analisi Grafica</div>
+        <div class="nav-tab active" onclick="UI.setTab('calc')">📝 Planner</div>
+        <div class="nav-tab" onclick="UI.setTab('chart')">📊 Chart Analysis</div>
     </div>
 
     <div id="view-calc" class="view-section active">
         <div class="controls-grid">
             <div class="control-section var-a">
-                <h3 class="section-title">Parametri Villaggio</h3>
+                <h3 class="section-title">Village Parameters</h3>
                 <div class="control-group">
-                    <label>Layout Campi</label>
+                    <label>Field Layout</label>
                     <select id="villageType">
                         <option value="4446">4-4-4-6 (Standard)</option>
-                        <option value="11115">1-1-1-15 (15 Grani)</option>
-                        <option value="3339">3-3-3-9 (9 Grani)</option>
-                        <option value="4437">4-4-3-7 (7 Grani)</option>
-                        <option value="3447">3-4-4-7 (7 Grani)</option>
-                        <option value="4347">4-3-4-7 (7 Grani)</option>
-                        <option value="00018">0-0-0-18 (18 Grani)</option>
+                        <option value="11115">1-1-1-15 (15 Croppers)</option>
+                        <option value="3339">3-3-3-9 (9 Croppers)</option>
+                        <option value="4437">4-4-3-7 (7 Croppers)</option>
+                        <option value="3447">3-4-4-7 (7 Croppers)</option>
+                        <option value="4347">4-3-4-7 (7 Croppers)</option>
+                        <option value="00018">0-0-0-18 (18 Croppers)</option>
                     </select>
                 </div>
                 <div class="control-group">
-                    <label>Max Livello</label>
+                    <label>Max Level</label>
                     <div class="range-wrapper">
                         <input type="range" id="maxLevelRange" min="1" max="21" value="18" oninput="document.getElementById('maxLevel').value=this.value">
                         <input type="number" id="maxLevel" value="18" min="1" max="21" class="range-value" style="width:50px; border:none; background:transparent;" readonly>
                     </div>
                 </div>
                 <div class="control-group">
-                    <label>Tribù</label>
+                    <label>Tribe</label>
                     <select id="tribe">
-                        <option value="generic">Standard (Romani/Galli/Teutoni)</option>
-                        <option value="egyptian">Egizi (Bonus Acquedotto)</option>
+                        <option value="generic">Standard (Romans/Gauls/Teutons)</option>
+                        <option value="egyptian">Egyptians (Waterworks Bonus)</option>
                     </select>
                 </div>
                 <div class="control-group">
-                    <label>Bonus Gold (+25%)</label>
+                    <label>Gold Bonus (+25%)</label>
                     <select id="goldBonus">
-                        <option value="1.25">Attivo</option>
-                        <option value="1.0">Disattivato</option>
+                        <option value="1.25">Active</option>
+                        <option value="1.0">Disabled</option>
                     </select>
                 </div>
             </div>
 
             <div class="control-section var-b">
-                <h3 class="section-title">Oasi Conquistabili</h3>
+                <h3 class="section-title">Conquerable Oases</h3>
                 <div class="control-group">
-                    <label>Oasi 1</label>
+                    <label>Oasis 1</label>
                     <select id="oasis1">
-                        <option value="none">Nessuna</option>
-                        <option value="crop-25">🌾 Grano 25%</option>
-                        <option value="crop-50">🌾 Grano 50%</option>
-                        <option value="wood-25">🌲 Legno 25%</option>
-                        <option value="wood-50">🌲 Legno 50%</option>
-                        <option value="wood-25_crop-25">🌲 Legno 25% + 🌾 Grano 25%</option>
-                        <option value="clay-25">🧱 Argilla 25%</option>
-                        <option value="clay-50">🧱 Argilla 50%</option>
-                        <option value="clay-25_crop-25">🧱 Argilla 25% + 🌾 Grano 25%</option>
-                        <option value="iron-25">⚒️ Ferro 25%</option>
-                        <option value="iron-50">⚒️ Ferro 50%</option>
-                        <option value="iron-25_crop-25">⚒️ Ferro 25% + 🌾 Grano 25%</option>
+                        <option value="none">None</option>
+                        <option value="crop-25">🌾 Crop 25%</option>
+                        <option value="crop-50">🌾 Crop 50%</option>
+                        <option value="wood-25">🌲 Wood 25%</option>
+                        <option value="wood-50">🌲 Wood 50%</option>
+                        <option value="wood-25_crop-25">🌲 Wood 25% + 🌾 Crop 25%</option>
+                        <option value="clay-25">🧱 Clay 25%</option>
+                        <option value="clay-50">🧱 Clay 50%</option>
+                        <option value="clay-25_crop-25">🧱 Clay 25% + 🌾 Crop 25%</option>
+                        <option value="iron-25">⚒️ Iron 25%</option>
+                        <option value="iron-50">⚒️ Iron 50%</option>
+                        <option value="iron-25_crop-25">⚒️ Iron 25% + 🌾 Crop 25%</option>
                     </select>
                 </div>
                 <div class="control-group">
-                    <label>Oasi 2</label>
+                    <label>Oasis 2</label>
                     <select id="oasis2">
-                        <option value="none">Nessuna</option>
-                        <option value="crop-25">🌾 Grano 25%</option>
-                        <option value="crop-50">🌾 Grano 50%</option>
-                        <option value="wood-25">🌲 Legno 25%</option>
-                        <option value="wood-50">🌲 Legno 50%</option>
-                        <option value="wood-25_crop-25">🌲 Legno 25% + 🌾 Grano 25%</option>
-                        <option value="clay-25">🧱 Argilla 25%</option>
-                        <option value="clay-50">🧱 Argilla 50%</option>
-                        <option value="clay-25_crop-25">🧱 Argilla 25% + 🌾 Grano 25%</option>
-                        <option value="iron-25">⚒️ Ferro 25%</option>
-                        <option value="iron-50">⚒️ Ferro 50%</option>
-                        <option value="iron-25_crop-25">⚒️ Ferro 25% + 🌾 Grano 25%</option>
+                        <option value="none">None</option>
+                        <option value="crop-25">🌾 Crop 25%</option>
+                        <option value="crop-50">🌾 Crop 50%</option>
+                        <option value="wood-25">🌲 Wood 25%</option>
+                        <option value="wood-50">🌲 Wood 50%</option>
+                        <option value="wood-25_crop-25">🌲 Wood 25% + 🌾 Crop 25%</option>
+                        <option value="clay-25">🧱 Clay 25%</option>
+                        <option value="clay-50">🧱 Clay 50%</option>
+                        <option value="clay-25_crop-25">🧱 Clay 25% + 🌾 Crop 25%</option>
+                        <option value="iron-25">⚒️ Iron 25%</option>
+                        <option value="iron-50">⚒️ Iron 50%</option>
+                        <option value="iron-25_crop-25">⚒️ Iron 25% + 🌾 Crop 25%</option>
                     </select>
                 </div>
                 <div class="control-group">
-                    <label>Oasi 3</label>
+                    <label>Oasis 3</label>
                     <select id="oasis3">
-                        <option value="none">Nessuna</option>
-                        <option value="crop-25">🌾 Grano 25%</option>
-                        <option value="crop-50">🌾 Grano 50%</option>
-                        <option value="wood-25">🌲 Legno 25%</option>
-                        <option value="wood-50">🌲 Legno 50%</option>
-                        <option value="wood-25_crop-25">🌲 Legno 25% + 🌾 Grano 25%</option>
-                        <option value="clay-25">🧱 Argilla 25%</option>
-                        <option value="clay-50">🧱 Argilla 50%</option>
-                        <option value="clay-25_crop-25">🧱 Argilla 25% + 🌾 Grano 25%</option>
-                        <option value="iron-25">⚒️ Ferro 25%</option>
-                        <option value="iron-50">⚒️ Ferro 50%</option>
-                        <option value="iron-25_crop-25">⚒️ Ferro 25% + 🌾 Grano 25%</option>
+                        <option value="none">None</option>
+                        <option value="crop-25">🌾 Crop 25%</option>
+                        <option value="crop-50">🌾 Crop 50%</option>
+                        <option value="wood-25">🌲 Wood 25%</option>
+                        <option value="wood-50">🌲 Wood 50%</option>
+                        <option value="wood-25_crop-25">🌲 Wood 25% + 🌾 Crop 25%</option>
+                        <option value="clay-25">🧱 Clay 25%</option>
+                        <option value="clay-50">🧱 Clay 50%</option>
+                        <option value="clay-25_crop-25">🧱 Clay 25% + 🌾 Crop 25%</option>
+                        <option value="iron-25">⚒️ Iron 25%</option>
+                        <option value="iron-50">⚒️ Iron 50%</option>
+                        <option value="iron-25_crop-25">⚒️ Iron 25% + 🌾 Crop 25%</option>
                     </select>
                 </div>
             </div>
             
             <div class="control-section var-c">
-                <h3 class="section-title">Edifici Produzione</h3>
+                <h3 class="section-title">Production Buildings</h3>
                 <div class="checkbox-grid">
-                    <label class="checkbox-item"><input type="checkbox" id="useSawmill" checked> Segheria</label>
-                    <label class="checkbox-item"><input type="checkbox" id="useBrickyard" checked> Fornace</label>
-                    <label class="checkbox-item"><input type="checkbox" id="useFoundry" checked> Fonderia</label>
-                    <label class="checkbox-item"><input type="checkbox" id="useMill" checked> Mulino</label>
-                    <label class="checkbox-item"><input type="checkbox" id="useBakery" checked> Forno</label>
-                    <label class="checkbox-item"><input type="checkbox" id="useWaterworks" checked> Acquedotto</label>
+                    <label class="checkbox-item"><input type="checkbox" id="useSawmill" checked> Sawmill</label>
+                    <label class="checkbox-item"><input type="checkbox" id="useBrickyard" checked> Brickyard</label>
+                    <label class="checkbox-item"><input type="checkbox" id="useFoundry" checked> Iron Foundry</label>
+                    <label class="checkbox-item"><input type="checkbox" id="useMill" checked> Grain Mill</label>
+                    <label class="checkbox-item"><input type="checkbox" id="useBakery" checked> Bakery</label>
+                    <label class="checkbox-item"><input type="checkbox" id="useWaterworks" checked> Waterworks</label>
                 </div>
             </div>
         </div>
 
         <div class="action-area">
-            <button type="button" class="calc-button" onclick="UI.calculateMain()">Calcola Percorso Ottimale</button>
+            <button type="button" class="calc-button" onclick="UI.calculateMain()">Calculate Optimal Path</button>
         </div>
 
         <div id="results-area" style="display:none;">
             <div class="stats-box">
-                <div class="stat-item"><span class="stat-label">Prod. Oraria</span><span class="stat-value" id="final-prod">0</span></div>
-                <div class="stat-item"><span class="stat-label">Costo Totale</span><span class="stat-value" id="final-cost">0</span></div>
-                <div class="stat-item"><span class="stat-label">ROI Finale</span><span class="stat-value" id="final-roi">0h</span></div>
+                <div class="stat-item"><span class="stat-label">Hourly Prod.</span><span class="stat-value" id="final-prod">0</span></div>
+                <div class="stat-item"><span class="stat-label">Total Cost</span><span class="stat-value" id="final-cost">0</span></div>
+                <div class="stat-item"><span class="stat-label">Final ROI</span><span class="stat-value" id="final-roi">0h</span></div>
             </div>
-            <div class="collapsible-header">Ordine di Sviluppo Ottimizzato</div>
+            <div class="collapsible-header">Optimized Development Order</div>
             <div class="collapsible-content">
                 <div class="table-responsive" id="output-grouped"></div>
             </div>

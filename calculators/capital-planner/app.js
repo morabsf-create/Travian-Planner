@@ -81,6 +81,7 @@ class TravianEngine {
         if (action.type === 'field') {
             const lvl = stateCopy[action.res][action.idx];
             if (lvl < this.config.maxLevel) {
+                // Map generic resource types to specific DB names [cite: 1]
                 const dbNameMap = { wood: "Woodcutter", clay: "Clay Pit", iron: "Iron Mine", crop: "Cropland" };
                 const c = getBuildingCost(dbNameMap[action.res], lvl + 1);
                 if (c) {
@@ -92,7 +93,7 @@ class TravianEngine {
         } else if (action.type === 'building') {
             const lvl = stateCopy[action.name];
             const db = BUILDING_DB[action.name];
-            // Check max level from DB (usually 5 for factories)
+            // Check max level from DB (usually 5 for factories) [cite: 2]
             if (lvl < db.max) {
                 const c = getBuildingCost(action.name, lvl + 1);
                 if (c) {
@@ -118,8 +119,6 @@ class TravianEngine {
         if (!valid || cost === 0) return { roi: Infinity };
 
         // --- PURE MATH ROI CALCULATION ---
-        // New Prod - Old Prod = Gain
-        // Cost / Gain = Hours to recover
         const newMetrics = this.calculateHourlyProduction(stateCopy);
         const gain = newMetrics.total - currentProdTotal;
         
@@ -154,7 +153,6 @@ class TravianEngine {
                 const arr = this.state[res];
                 if(arr.length === 0) return;
                 const minLvl = Math.min(...arr);
-                // Strategy: Only check lowest level field of each type (pure efficiency)
                 const idx = arr.indexOf(minLvl);
                 
                 const result = this.evaluateUpgrade({ type: 'field', res, idx }, currentMetrics.total);
@@ -227,16 +225,11 @@ class TravianEngine {
     }
 
     formatActionDesc(action) {
-        if (action.type === 'field') {
-            const map = { wood: 'Bosco', clay: 'Argilla', iron: 'Miniera', crop: 'Grano' };
-            return `Migliora ${map[action.name]} al livello ${action.lvl}`;
-        }
-        if (action.type === 'building') {
-            const map = { 'Sawmill': 'Segheria', 'Brickyard': 'Fornace', 'Iron Foundry': 'Fonderia', 'Grain Mill': 'Mulino', 'Bakery': 'Forno', 'Waterworks': 'Acquedotto' };
-            return `Costruisci ${map[action.name] || action.name} al livello ${action.lvl}`;
-        }
-        if (action.type === 'oasis') return `Conquista Oasi`;
-        return 'Azione';
+        // Fallback method - visuals handled by renderTable
+        if (action.type === 'field') return `Upgrade ${action.name} to ${action.lvl}`;
+        if (action.type === 'building') return `Build ${action.name} to ${action.lvl}`;
+        if (action.type === 'oasis') return `Conquer Oasis`;
+        return 'Action';
     }
 }
 
@@ -306,7 +299,7 @@ const UI = {
             type: 'line',
             data: {
                 datasets: [{
-                    label: 'Produzione Oraria',
+                    label: 'Hourly Production',
                     data: dataPoints,
                     borderColor: '#859f51',
                     backgroundColor: 'rgba(133, 159, 81, 0.1)',
@@ -319,8 +312,8 @@ const UI = {
                 responsive: true,
                 maintainAspectRatio: false,
                 scales: {
-                    x: { type: 'linear', title: { display: true, text: 'Risorse Totali' }, ticks: { callback: function(value) { return value >= 1000000 ? (value/1000000).toFixed(1) + 'M' : (value/1000).toFixed(0) + 'k'; } } },
-                    y: { title: { display: true, text: 'Prod. Oraria' } }
+                    x: { type: 'linear', title: { display: true, text: 'Total Resources' }, ticks: { callback: function(value) { return value >= 1000000 ? (value/1000000).toFixed(1) + 'M' : (value/1000).toFixed(0) + 'k'; } } },
+                    y: { title: { display: true, text: 'Hourly Prod.' } }
                 }
             }
         });
@@ -339,13 +332,13 @@ const UI = {
         const container = document.getElementById('output-grouped');
         container.innerHTML = '';
         const table = document.createElement('table');
-        table.innerHTML = `<thead><tr><th class="col-type">Tipo</th><th class="col-action">Azione</th><th class="col-prod">Prod. Oraria</th><th class="col-status">Stato Villaggio</th></tr></thead><tbody></tbody>`;
+        // Translated Headers
+        table.innerHTML = `<thead><tr><th class="col-type">Type</th><th class="col-action">Action</th><th class="col-prod">Hourly Prod.</th><th class="col-status">Village State</th></tr></thead><tbody></tbody>`;
         const tbody = table.querySelector('tbody');
 
         if(steps.length === 0) return;
 
         // --- GROUPING LOGIC ---
-        // Collapse consecutive identical actions
         let group = { ...steps[1], count: 1 }; // Start at step 1 (skip step 0)
 
         const flushGroup = (g) => {
@@ -354,31 +347,28 @@ const UI = {
             // Theme Badge
             let theme = 'theme-special';
             let label = g.type ? g.type.toUpperCase() : 'ACTION';
-            if(['wood','sawmill'].includes(g.type)) { theme = 'theme-wood'; label = 'LEGNO'; }
-            else if(['clay','brickyard'].includes(g.type)) { theme = 'theme-clay'; label = 'ARGILLA'; }
-            else if(['iron','foundry'].includes(g.type)) { theme = 'theme-iron'; label = 'FERRO'; }
-            else if(['crop','mill','bakery'].includes(g.type)) { theme = 'theme-crop'; label = 'GRANO'; }
-            else if(g.type === 'oasis') { theme = 'theme-special'; label = 'OASI'; }
+            if(['wood','sawmill'].includes(g.type)) { theme = 'theme-wood'; label = 'WOOD'; }
+            else if(['clay','brickyard'].includes(g.type)) { theme = 'theme-clay'; label = 'CLAY'; }
+            else if(['iron','foundry'].includes(g.type)) { theme = 'theme-iron'; label = 'IRON'; }
+            else if(['crop','mill','bakery'].includes(g.type)) { theme = 'theme-crop'; label = 'CROP'; }
+            else if(g.type === 'oasis') { theme = 'theme-special'; label = 'OASIS'; }
 
-            // Construct Action Description
+            // Action Description (Translated)
             let actionText = "";
             const mapName = {
-                wood: 'Bosco', clay: 'Argilla', iron: 'Miniera', crop: 'Grano',
-                sawmill: 'Segheria', brickyard: 'Fornace', foundry: 'Fonderia', 
-                mill: 'Mulino', bakery: 'Forno', waterworks: 'Acquedotto', oasis: 'Oasi'
+                wood: 'Woodcutter', clay: 'Clay Pit', iron: 'Iron Mine', crop: 'Cropland',
+                sawmill: 'Sawmill', brickyard: 'Brickyard', foundry: 'Iron Foundry', 
+                mill: 'Grain Mill', bakery: 'Bakery', waterworks: 'Waterworks', oasis: 'Oasis'
             };
             const name = mapName[g.type] || g.type;
 
             if (['wood','clay','iron','crop'].includes(g.type)) {
-                // Grouped: "Porta 5x Grano al livello 7"
-                actionText = `Porta <b>${g.count}</b> ${name} al livello <b>${g.lvl}</b>`;
+                actionText = `Upgrade <b>${g.count}</b> ${name} to level <b>${g.lvl}</b>`;
             } else {
-                // Buildings are usually single, but if grouped (rare), display nicely
-                if(g.count > 1) actionText = `Porta <b>${g.count}</b> ${name} al livello <b>${g.lvl}</b>`;
-                else actionText = `Costruisci ${name} al livello ${g.lvl}`;
+                if(g.count > 1) actionText = `Upgrade <b>${g.count}</b> ${name} to level <b>${g.lvl}</b>`;
+                else actionText = `Construct ${name} to level ${g.lvl}`;
             }
 
-            // Using "text-cell" and "prod-cell" for mobile compatibility
             tr.innerHTML = `<td class="type-cell"><span class="badge ${theme}">${label}</span></td>
                 <td class="text-cell">${actionText} <span style="font-size:0.8em; color:#888; white-space:nowrap;">(ROI: ${g.roi}h)</span></td>
                 <td class="prod-cell">${g.prod.toLocaleString()}</td>
@@ -388,7 +378,7 @@ const UI = {
 
         for (let i = 2; i < steps.length; i++) {
             const s = steps[i];
-            // Group if: same type AND same target level (e.g. Field 6->7 and Field 6->7)
+            // Group if: same type AND same target level
             if (s.type === group.type && s.lvl === group.lvl && ['wood','clay','iron','crop'].includes(s.type)) {
                 group.count++;
                 group.prod = s.prod; // Use latest production
