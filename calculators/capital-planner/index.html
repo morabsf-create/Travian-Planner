@@ -1,4 +1,4 @@
-\<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="it">
 <head>
     <meta charset="UTF-8">
@@ -69,29 +69,51 @@
                     <label>Oasi 1</label>
                     <select id="oasis1">
                         <option value="none">Nessuna</option>
-                        <option value="crop-0.25">🌾 Grano 25%</option>
-                        <option value="crop-0.50">🌾 Grano 50%</option>
-                        <option value="wood-0.25">🌲 Legno 25%</option>
-                        <option value="clay-0.25">🧱 Argilla 25%</option>
-                        <option value="iron-0.25">⚒️ Ferro 25%</option>
+                        <option value="crop-25">🌾 Grano 25%</option>
+                        <option value="crop-50">🌾 Grano 50%</option>
+                        <option value="wood-25">🌲 Legno 25%</option>
+                        <option value="wood-50">🌲 Legno 50%</option>
+                        <option value="wood-25_crop-25">🌲 Legno 25% + 🌾 Grano 25%</option>
+                        <option value="clay-25">🧱 Argilla 25%</option>
+                        <option value="clay-50">🧱 Argilla 50%</option>
+                        <option value="clay-25_crop-25">🧱 Argilla 25% + 🌾 Grano 25%</option>
+                        <option value="iron-25">⚒️ Ferro 25%</option>
+                        <option value="iron-50">⚒️ Ferro 50%</option>
+                        <option value="iron-25_crop-25">⚒️ Ferro 25% + 🌾 Grano 25%</option>
                     </select>
                 </div>
                 <div class="control-group">
                     <label>Oasi 2</label>
                     <select id="oasis2">
                         <option value="none">Nessuna</option>
-                        <option value="crop-0.25">🌾 Grano 25%</option>
-                        <option value="wood-0.25">🌲 Legno 25%</option>
-                        <option value="clay-0.25">🧱 Argilla 25%</option>
-                        <option value="iron-0.25">⚒️ Ferro 25%</option>
+                        <option value="crop-25">🌾 Grano 25%</option>
+                        <option value="crop-50">🌾 Grano 50%</option>
+                        <option value="wood-25">🌲 Legno 25%</option>
+                        <option value="wood-50">🌲 Legno 50%</option>
+                        <option value="wood-25_crop-25">🌲 Legno 25% + 🌾 Grano 25%</option>
+                        <option value="clay-25">🧱 Argilla 25%</option>
+                        <option value="clay-50">🧱 Argilla 50%</option>
+                        <option value="clay-25_crop-25">🧱 Argilla 25% + 🌾 Grano 25%</option>
+                        <option value="iron-25">⚒️ Ferro 25%</option>
+                        <option value="iron-50">⚒️ Ferro 50%</option>
+                        <option value="iron-25_crop-25">⚒️ Ferro 25% + 🌾 Grano 25%</option>
                     </select>
                 </div>
                 <div class="control-group">
                     <label>Oasi 3</label>
                     <select id="oasis3">
                         <option value="none">Nessuna</option>
-                        <option value="crop-0.25">🌾 Grano 25%</option>
-                        <option value="crop-0.50">🌾 Grano 50%</option>
+                        <option value="crop-25">🌾 Grano 25%</option>
+                        <option value="crop-50">🌾 Grano 50%</option>
+                        <option value="wood-25">🌲 Legno 25%</option>
+                        <option value="wood-50">🌲 Legno 50%</option>
+                        <option value="wood-25_crop-25">🌲 Legno 25% + 🌾 Grano 25%</option>
+                        <option value="clay-25">🧱 Argilla 25%</option>
+                        <option value="clay-50">🧱 Argilla 50%</option>
+                        <option value="clay-25_crop-25">🧱 Argilla 25% + 🌾 Grano 25%</option>
+                        <option value="iron-25">⚒️ Ferro 25%</option>
+                        <option value="iron-50">⚒️ Ferro 50%</option>
+                        <option value="iron-25_crop-25">⚒️ Ferro 25% + 🌾 Grano 25%</option>
                     </select>
                 </div>
             </div>
@@ -114,7 +136,8 @@
                 <div class="stat-item"><span class="stat-label">Costo Totale</span><span class="stat-value" id="final-cost">0</span></div>
                 <div class="stat-item"><span class="stat-label">ROI Finale</span><span class="stat-value" id="final-roi">0h</span></div>
             </div>
-            <div class="collapsible-header">Ordine di Sviluppo</div>
+            
+            <div class="collapsible-header">Ordine di Sviluppo Ottimizzato</div>
             <div class="collapsible-content">
                 <div class="table-responsive" id="output-grouped"></div>
             </div>

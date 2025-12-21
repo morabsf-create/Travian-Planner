@@ -77,7 +77,7 @@ class TravianEngine {
         let cost = 0;
         let valid = false;
 
-        // getBuildingCost is available globally via data.js
+        // VERIFICATION: Using getBuildingCost uses the data.js Database, not hardcoded arrays
         if (action.type === 'field') {
             const lvl = stateCopy[action.res][action.idx];
             if (lvl < this.config.maxLevel) {
@@ -248,8 +248,15 @@ const UI = {
     getOasisVal: function(id) {
         const val = document.getElementById(id).value;
         if(val === 'none') return {};
-        const [type, num] = val.split('-');
-        return { [type]: parseFloat(num) };
+        // Handles "wood-25_crop-25" style strings
+        const parts = val.split('_');
+        const res = {};
+        parts.forEach(p => {
+            const [type, num] = p.split('-');
+            // Convert '25' to 0.25
+            res[type] = parseFloat(num) / 100.0;
+        });
+        return res;
     },
 
     calculateMain: function() {
@@ -273,6 +280,7 @@ const UI = {
         if (this.chartInstance) this.chartInstance.destroy();
 
         const rawData = this.currentResult.steps.map(s => ({ x: s.totalSpent, y: s.prod }));
+        // Downsample chart points for performance
         const dataPoints = rawData.filter((_, i) => i % Math.ceil(rawData.length / 50) === 0 || i === rawData.length - 1);
 
         this.chartInstance = new Chart(ctx, {
@@ -292,7 +300,7 @@ const UI = {
                 responsive: true,
                 maintainAspectRatio: false,
                 scales: {
-                    x: { type: 'linear', title: { display: true, text: 'Risorse Totali' } },
+                    x: { type: 'linear', title: { display: true, text: 'Risorse Totali' }, ticks: { callback: function(value) { return value >= 1000000 ? (value/1000000).toFixed(1) + 'M' : (value/1000).toFixed(0) + 'k'; } } },
                     y: { title: { display: true, text: 'Prod. Oraria' } }
                 }
             }
@@ -315,23 +323,63 @@ const UI = {
         table.innerHTML = `<thead><tr><th class="col-type">Tipo</th><th class="col-action">Azione</th><th class="col-prod">Prod. Oraria</th><th class="col-status">Stato Villaggio</th></tr></thead><tbody></tbody>`;
         const tbody = table.querySelector('tbody');
 
-        steps.forEach((step) => {
-            if (step.step === 0) return;
-            const tr = document.createElement('tr');
-            let theme = 'theme-special';
-            let label = step.type ? step.type.toUpperCase() : 'ACTION';
-            if(['wood','sawmill'].includes(step.type)) { theme = 'theme-wood'; label = 'LEGNO'; }
-            else if(['clay','brickyard'].includes(step.type)) { theme = 'theme-clay'; label = 'ARGILLA'; }
-            else if(['iron','foundry'].includes(step.type)) { theme = 'theme-iron'; label = 'FERRO'; }
-            else if(['crop','mill','bakery'].includes(step.type)) { theme = 'theme-crop'; label = 'GRANO'; }
-            else if(step.type === 'oasis') { theme = 'theme-special'; label = 'OASI'; }
+        if(steps.length === 0) return;
 
+        // --- GROUPING LOGIC ---
+        // We look for consecutive steps that are the same Type and same Level
+        let group = { ...steps[1], count: 1 }; // Start at index 1 (skip step 0)
+
+        const flushGroup = (g) => {
+            const tr = document.createElement('tr');
+            
+            // Theme Badge
+            let theme = 'theme-special';
+            let label = g.type ? g.type.toUpperCase() : 'ACTION';
+            if(['wood','sawmill'].includes(g.type)) { theme = 'theme-wood'; label = 'LEGNO'; }
+            else if(['clay','brickyard'].includes(g.type)) { theme = 'theme-clay'; label = 'ARGILLA'; }
+            else if(['iron','foundry'].includes(g.type)) { theme = 'theme-iron'; label = 'FERRO'; }
+            else if(['crop','mill','bakery'].includes(g.type)) { theme = 'theme-crop'; label = 'GRANO'; }
+            else if(g.type === 'oasis') { theme = 'theme-special'; label = 'OASI'; }
+
+            // Action Text
+            let actionText = "";
+            const mapName = {
+                wood: 'Bosco', clay: 'Argilla', iron: 'Miniera', crop: 'Grano',
+                sawmill: 'Segheria', brickyard: 'Fornace', foundry: 'Fonderia', 
+                mill: 'Mulino', bakery: 'Forno', waterworks: 'Acquedotto', oasis: 'Oasi'
+            };
+            const name = mapName[g.type] || g.type;
+
+            if (['wood','clay','iron','crop'].includes(g.type)) {
+                // e.g., "Porta 3 Grano al livello 5"
+                actionText = `Porta <b>${g.count}</b> ${name} al livello <b>${g.lvl}</b>`;
+            } else {
+                actionText = `Costruisci ${name} al livello ${g.lvl}`;
+            }
+
+            // Using "text-cell" and "prod-cell" classes ensures Mobile Friendliness via CSS
             tr.innerHTML = `<td class="type-cell"><span class="badge ${theme}">${label}</span></td>
-                <td class="text-cell">${step.desc} <span style="font-size:0.8em; color:#888;">(ROI: ${step.roi}h)</span></td>
-                <td class="prod-cell">${step.prod.toLocaleString()}</td>
-                <td class="status-cell">${this.renderStateChips(step.state)}</td>`;
+                <td class="text-cell">${actionText} <span style="font-size:0.8em; color:#888; white-space:nowrap;">(ROI: ${g.roi}h)</span></td>
+                <td class="prod-cell">${g.prod.toLocaleString()}</td>
+                <td class="status-cell">${this.renderStateChips(g.state)}</td>`;
             tbody.appendChild(tr);
-        });
+        };
+
+        for (let i = 2; i < steps.length; i++) {
+            const s = steps[i];
+            // Check if matches current group (same type, same target level)
+            if (s.type === group.type && s.lvl === group.lvl && ['wood','clay','iron','crop'].includes(s.type)) {
+                group.count++;
+                group.prod = s.prod; // Update to latest production
+                group.state = s.state; // Update to latest state (for chips)
+            } else {
+                flushGroup(group);
+                group = { ...s, count: 1 };
+            }
+        }
+        // Flush last group
+        if(steps.length > 1) flushGroup(group);
+
         container.appendChild(table);
     },
 
