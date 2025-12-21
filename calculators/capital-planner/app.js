@@ -43,7 +43,8 @@ class TravianEngine {
 
     calculateHourlyProduction(state) {
         // PRODUCTION_CURVE is available globally via data.js
-        const getBase = (arr) => arr.reduce((sum, lvl) => sum + (lvl > 0 ? PRODUCTION_CURVE[lvl-1] : 0), 0);
+        // FIXED: Removed offset. Assumes PRODUCTION_CURVE[0] is Level 0, PRODUCTION_CURVE[1] is Level 1.
+        const getBase = (arr) => arr.reduce((sum, lvl) => sum + PRODUCTION_CURVE[lvl], 0);
         
         const isEgypt = this.config.tribe === 'egyptian';
         const wwBonus = isEgypt ? (1 + state.waterworks * CONSTANTS.TRIBE_EGYPT_BONUS) : 1;
