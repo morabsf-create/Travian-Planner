@@ -118,11 +118,16 @@
                 </div>
             </div>
             
-             <div class="control-section var-c">
-                <h3 class="section-title">Note</h3>
-                <p style="font-size: 0.85rem; color: #666;">
-                    Usa calcoli <b>ROI Puri</b> basati sul database ufficiale edifici 4.6.
-                </p>
+            <div class="control-section var-c">
+                <h3 class="section-title">Edifici Produzione</h3>
+                <div class="checkbox-grid">
+                    <label class="checkbox-item"><input type="checkbox" id="useSawmill" checked> Segheria</label>
+                    <label class="checkbox-item"><input type="checkbox" id="useBrickyard" checked> Fornace</label>
+                    <label class="checkbox-item"><input type="checkbox" id="useFoundry" checked> Fonderia</label>
+                    <label class="checkbox-item"><input type="checkbox" id="useMill" checked> Mulino</label>
+                    <label class="checkbox-item"><input type="checkbox" id="useBakery" checked> Forno</label>
+                    <label class="checkbox-item"><input type="checkbox" id="useWaterworks" checked> Acquedotto</label>
+                </div>
             </div>
         </div>
 
@@ -136,7 +141,6 @@
                 <div class="stat-item"><span class="stat-label">Costo Totale</span><span class="stat-value" id="final-cost">0</span></div>
                 <div class="stat-item"><span class="stat-label">ROI Finale</span><span class="stat-value" id="final-roi">0h</span></div>
             </div>
-            
             <div class="collapsible-header">Ordine di Sviluppo Ottimizzato</div>
             <div class="collapsible-content">
                 <div class="table-responsive" id="output-grouped"></div>

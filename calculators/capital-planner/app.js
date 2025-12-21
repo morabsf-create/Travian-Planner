@@ -77,7 +77,7 @@ class TravianEngine {
         let cost = 0;
         let valid = false;
 
-        // VERIFICATION: Using getBuildingCost uses the data.js Database, not hardcoded arrays
+        // --- COST LOOKUP FROM DB ---
         if (action.type === 'field') {
             const lvl = stateCopy[action.res][action.idx];
             if (lvl < this.config.maxLevel) {
@@ -92,6 +92,7 @@ class TravianEngine {
         } else if (action.type === 'building') {
             const lvl = stateCopy[action.name];
             const db = BUILDING_DB[action.name];
+            // Check max level from DB (usually 5 for factories)
             if (lvl < db.max) {
                 const c = getBuildingCost(action.name, lvl + 1);
                 if (c) {
@@ -116,8 +117,12 @@ class TravianEngine {
 
         if (!valid || cost === 0) return { roi: Infinity };
 
+        // --- PURE MATH ROI CALCULATION ---
+        // New Prod - Old Prod = Gain
+        // Cost / Gain = Hours to recover
         const newMetrics = this.calculateHourlyProduction(stateCopy);
         const gain = newMetrics.total - currentProdTotal;
+        
         if (gain <= 0.01) return { roi: Infinity }; 
 
         return {
@@ -131,9 +136,9 @@ class TravianEngine {
     runSimulation() {
         const steps = [];
         let totalSpent = 0;
-        const MAX_STEPS = 1500; 
+        const MAX_STEPS = 2000; 
 
-        // Step 0
+        // Initial State
         steps.push({
             step: 0, desc: "Start", prod: Math.round(this.calculateHourlyProduction(this.state).total), 
             cost: 0, totalSpent: 0, roi: 0, state: JSON.parse(JSON.stringify(this.state))
@@ -144,11 +149,12 @@ class TravianEngine {
             let bestMove = { roi: Infinity };
             let bestAction = null;
 
-            // 1. Fields
+            // 1. Evaluate All Fields (find best ROI among fields)
             ['wood', 'clay', 'iron', 'crop'].forEach(res => {
                 const arr = this.state[res];
                 if(arr.length === 0) return;
                 const minLvl = Math.min(...arr);
+                // Strategy: Only check lowest level field of each type (pure efficiency)
                 const idx = arr.indexOf(minLvl);
                 
                 const result = this.evaluateUpgrade({ type: 'field', res, idx }, currentMetrics.total);
@@ -158,17 +164,20 @@ class TravianEngine {
                 }
             });
 
-            // 2. Buildings
+            // 2. Evaluate Buildings (if enabled in config)
             const factories = [
-                { id: 'sawmill', db: 'Sawmill', reqField: 'wood', reqLvl: 10 },
-                { id: 'brickyard', db: 'Brickyard', reqField: 'clay', reqLvl: 10 },
-                { id: 'foundry', db: 'Iron Foundry', reqField: 'iron', reqLvl: 10 },
-                { id: 'mill', db: 'Grain Mill', reqField: 'crop', reqLvl: 5 },
-                { id: 'bakery', db: 'Bakery', reqField: 'crop', reqLvl: 10, reqBuild: 'mill', reqBuildLvl: 5 },
-                { id: 'waterworks', db: 'Waterworks', tribe: 'egyptian' } 
+                { id: 'sawmill', db: 'Sawmill', reqField: 'wood', reqLvl: 10, enabled: this.config.useSawmill },
+                { id: 'brickyard', db: 'Brickyard', reqField: 'clay', reqLvl: 10, enabled: this.config.useBrickyard },
+                { id: 'foundry', db: 'Iron Foundry', reqField: 'iron', reqLvl: 10, enabled: this.config.useFoundry },
+                { id: 'mill', db: 'Grain Mill', reqField: 'crop', reqLvl: 5, enabled: this.config.useMill },
+                { id: 'bakery', db: 'Bakery', reqField: 'crop', reqLvl: 10, reqBuild: 'mill', reqBuildLvl: 5, enabled: this.config.useBakery },
+                { id: 'waterworks', db: 'Waterworks', tribe: 'egyptian', enabled: this.config.useWaterworks } 
             ];
 
             factories.forEach(f => {
+                if (!f.enabled) return; // SKIP if unchecked
+
+                // Prerequisite Checks
                 if (f.reqField) {
                     const maxField = Math.max(...this.state[f.reqField]);
                     if (maxField < f.reqLvl) return;
@@ -179,13 +188,15 @@ class TravianEngine {
                 if (f.tribe && this.config.tribe !== f.tribe) return;
 
                 const result = this.evaluateUpgrade({ type: 'building', name: f.db }, currentMetrics.total);
+                
+                // Compare Building ROI vs Field ROI
                 if (result.roi < bestMove.roi) {
                     bestMove = result;
                     bestAction = { type: 'building', name: f.db, lvl: this.state[f.id] + 1, sortKey: f.id };
                 }
             });
 
-            // 3. Oasis
+            // 3. Evaluate Oasis (if available)
             if (this.state.oasisActive < 3 && Object.keys(this.config.oases[this.state.oasisActive]).length > 0) {
                  const result = this.evaluateUpgrade({ type: 'oasis' }, currentMetrics.total);
                  if (result.roi < bestMove.roi) {
@@ -196,6 +207,7 @@ class TravianEngine {
 
             if (bestMove.roi === Infinity) break;
 
+            // Apply best move
             this.state = bestMove.newState;
             totalSpent += bestMove.cost;
             
@@ -203,7 +215,7 @@ class TravianEngine {
                 step: step + 1,
                 desc: this.formatActionDesc(bestAction),
                 type: bestAction.sortKey, 
-                lvl: bestAction.lvl,
+                lvl: bestAction.lvl, // Target Level
                 prod: Math.round(bestMove.prod),
                 cost: bestMove.cost,
                 totalSpent: totalSpent,
@@ -248,25 +260,33 @@ const UI = {
     getOasisVal: function(id) {
         const val = document.getElementById(id).value;
         if(val === 'none') return {};
-        // Handles "wood-25_crop-25" style strings
         const parts = val.split('_');
         const res = {};
         parts.forEach(p => {
             const [type, num] = p.split('-');
-            // Convert '25' to 0.25
             res[type] = parseFloat(num) / 100.0;
         });
         return res;
     },
 
     calculateMain: function() {
+        // Gather all inputs including new checkboxes
         const config = {
             villageType: document.getElementById('villageType').value,
             tribe: document.getElementById('tribe').value,
             maxLevel: parseInt(document.getElementById('maxLevel').value),
             goldBonus: parseFloat(document.getElementById('goldBonus').value),
-            oases: [this.getOasisVal('oasis1'), this.getOasisVal('oasis2'), this.getOasisVal('oasis3')]
+            oases: [this.getOasisVal('oasis1'), this.getOasisVal('oasis2'), this.getOasisVal('oasis3')],
+            
+            // New Building Flags
+            useSawmill: document.getElementById('useSawmill').checked,
+            useBrickyard: document.getElementById('useBrickyard').checked,
+            useFoundry: document.getElementById('useFoundry').checked,
+            useMill: document.getElementById('useMill').checked,
+            useBakery: document.getElementById('useBakery').checked,
+            useWaterworks: document.getElementById('useWaterworks').checked
         };
+
         const engine = new TravianEngine(config);
         const result = engine.runSimulation();
         this.renderTable(result);
@@ -280,7 +300,6 @@ const UI = {
         if (this.chartInstance) this.chartInstance.destroy();
 
         const rawData = this.currentResult.steps.map(s => ({ x: s.totalSpent, y: s.prod }));
-        // Downsample chart points for performance
         const dataPoints = rawData.filter((_, i) => i % Math.ceil(rawData.length / 50) === 0 || i === rawData.length - 1);
 
         this.chartInstance = new Chart(ctx, {
@@ -326,8 +345,8 @@ const UI = {
         if(steps.length === 0) return;
 
         // --- GROUPING LOGIC ---
-        // We look for consecutive steps that are the same Type and same Level
-        let group = { ...steps[1], count: 1 }; // Start at index 1 (skip step 0)
+        // Collapse consecutive identical actions
+        let group = { ...steps[1], count: 1 }; // Start at step 1 (skip step 0)
 
         const flushGroup = (g) => {
             const tr = document.createElement('tr');
@@ -341,7 +360,7 @@ const UI = {
             else if(['crop','mill','bakery'].includes(g.type)) { theme = 'theme-crop'; label = 'GRANO'; }
             else if(g.type === 'oasis') { theme = 'theme-special'; label = 'OASI'; }
 
-            // Action Text
+            // Construct Action Description
             let actionText = "";
             const mapName = {
                 wood: 'Bosco', clay: 'Argilla', iron: 'Miniera', crop: 'Grano',
@@ -351,13 +370,15 @@ const UI = {
             const name = mapName[g.type] || g.type;
 
             if (['wood','clay','iron','crop'].includes(g.type)) {
-                // e.g., "Porta 3 Grano al livello 5"
+                // Grouped: "Porta 5x Grano al livello 7"
                 actionText = `Porta <b>${g.count}</b> ${name} al livello <b>${g.lvl}</b>`;
             } else {
-                actionText = `Costruisci ${name} al livello ${g.lvl}`;
+                // Buildings are usually single, but if grouped (rare), display nicely
+                if(g.count > 1) actionText = `Porta <b>${g.count}</b> ${name} al livello <b>${g.lvl}</b>`;
+                else actionText = `Costruisci ${name} al livello ${g.lvl}`;
             }
 
-            // Using "text-cell" and "prod-cell" classes ensures Mobile Friendliness via CSS
+            // Using "text-cell" and "prod-cell" for mobile compatibility
             tr.innerHTML = `<td class="type-cell"><span class="badge ${theme}">${label}</span></td>
                 <td class="text-cell">${actionText} <span style="font-size:0.8em; color:#888; white-space:nowrap;">(ROI: ${g.roi}h)</span></td>
                 <td class="prod-cell">${g.prod.toLocaleString()}</td>
@@ -367,17 +388,16 @@ const UI = {
 
         for (let i = 2; i < steps.length; i++) {
             const s = steps[i];
-            // Check if matches current group (same type, same target level)
+            // Group if: same type AND same target level (e.g. Field 6->7 and Field 6->7)
             if (s.type === group.type && s.lvl === group.lvl && ['wood','clay','iron','crop'].includes(s.type)) {
                 group.count++;
-                group.prod = s.prod; // Update to latest production
-                group.state = s.state; // Update to latest state (for chips)
+                group.prod = s.prod; // Use latest production
+                group.state = s.state; // Use latest state
             } else {
                 flushGroup(group);
                 group = { ...s, count: 1 };
             }
         }
-        // Flush last group
         if(steps.length > 1) flushGroup(group);
 
         container.appendChild(table);
