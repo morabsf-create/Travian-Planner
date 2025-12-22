@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Troop Training Calculator - Travian Tools</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Vollkorn:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../css/style.css">
+    <style>
+        .calc-grid { display: grid; grid-template-columns: 300px 1fr; gap: 20px; }
+        .panel { background: #fff; padding: 20px; border-radius: 8px; border: 1px solid #c9b7a2; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-weight: bold; margin-bottom: 5px; color: #5e4b35; }
+        .form-group input, .form-group select { width: 100%; padding: 8px; border: 1px solid #c9b7a2; border-radius: 4px; }
+        .results-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        .results-table th, .results-table td { text-align: left; padding: 10px; border-bottom: 1px solid #eee; }
+        .results-table th { background-color: #f4f4f4; color: #5e4b35; }
+        .res-icon { width: 18px; vertical-align: middle; margin-right: 4px; }
+        @media (max-width: 768px) { .calc-grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div style="margin-bottom: 20px;">
+        <a href="../../index.html" style="text-decoration: none; color: #859f51; font-weight: bold;">&larr; Back to Hub</a>
+    </div>
+
+    <h1>Troop Training Calculator</h1>
+    <p>Calculate unit production over time based on building levels and server speed.</p>
+
+    <div class="calc-grid">
+        <div class="panel">
+            <h3>⚙️ Settings</h3>
+            
+            <div class="form-group">
+                <label>Tribe</label>
+                <select id="tribeSelect" onchange="TroopApp.render()"></select>
+            </div>
+
+            <div class="form-group">
+                <label>Time Duration (Hours)</label>
+                <input type="number" id="duration" value="24" min="1" oninput="TroopApp.render()">
+            </div>
+
+            <div class="form-group">
+                <label>Server Speed</label>
+                <select id="serverSpeed" onchange="TroopApp.render()">
+                    <option value="1">1x</option>
+                    <option value="2">2x</option>
+                    <option value="3">3x</option>
+                    <option value="5">5x</option>
+                </select>
+            </div>
+
+            <hr style="border-top: 1px solid #eee; margin: 15px 0;">
+
+            <div class="form-group">
+                <label>Barracks Level (0-20)</label>
+                <input type="number" id="lvl_Barracks" value="20" min="0" max="20" oninput="TroopApp.render()">
+            </div>
+            <div class="form-group">
+                <label>Stable Level (0-20)</label>
+                <input type="number" id="lvl_Stable" value="20" min="0" max="20" oninput="TroopApp.render()">
+            </div>
+            <div class="form-group">
+                <label>Workshop Level (0-20)</label>
+                <input type="number" id="lvl_Workshop" value="20" min="0" max="20" oninput="TroopApp.render()">
+            </div>
+
+            <hr style="border-top: 1px solid #eee; margin: 15px 0;">
+
+            <div class="form-group">
+                <label>Artifact Effect</label>
+                <select id="artifact" onchange="TroopApp.render()">
+                    <option value="1.0">None</option>
+                    <option value="0.75">Small (Train Faster)</option>
+                    <option value="0.5">Large/Unique</option>
+                </select>
+            </div>
+             <div class="form-group">
+                <label>Helmet Bonus (%)</label>
+                <input type="number" id="helmet" value="0" min="0" max="100" placeholder="e.g. 15" oninput="TroopApp.render()">
+            </div>
+        </div>
+
+        <div class="panel">
+            <h3>📊 Production Results</h3>
+            <div style="overflow-x: auto;">
+                <table class="results-table">
+                    <thead>
+                        <tr>
+                            <th>Unit</th>
+                            <th>Count</th>
+                            <th>Cost</th>
+                            <th>Power (Off/Def)</th>
+                            <th>Upkeep</th>
+                        </tr>
+                    </thead>
+                    <tbody id="resultsBody">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
