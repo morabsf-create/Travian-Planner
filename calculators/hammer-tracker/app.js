@@ -119,25 +119,21 @@ const HammerApp = {
 
         let maxBuildTimeSec = 0;
 
-        const processSection = (type, uId, lvlId, lvlGId, snapId, helm, outputTotalId, outputLabelId, projId) => {
+        const processSection = (type, uId, lvlId, lvlGId, snapId, helm, globalLabelId, projId) => {
             const unitName = document.getElementById(uId).value;
             const snapshot = parseInt(document.getElementById(snapId).value) || 0;
             const lvl = parseInt(document.getElementById(lvlId).value) || 0;
             const lvlG = lvlGId ? (parseInt(document.getElementById(lvlGId).value) || 0) : 0; 
 
-            // Label Updates
-            const labelEl = document.getElementById(outputLabelId);
-            const globalLabelEl = document.getElementById(outputLabelId + "_g"); 
-            
+            // Update Label in Global Section
+            const globalLabelEl = document.getElementById(globalLabelId); 
             const displayLabel = unitName ? unitName.toUpperCase() : type.toUpperCase();
-            if(labelEl) labelEl.innerText = displayLabel;
             if(globalLabelEl) globalLabelEl.innerText = displayLabel;
 
             if(!unitName) {
-                document.getElementById(outputTotalId).innerText = snapshot.toLocaleString();
                 document.getElementById(projId).innerText = "+0";
                 
-                // Track Snapshots even if not training
+                // Track Snapshots
                 if(type === 'infantry') gInfCount += snapshot;
                 if(type === 'cavalry') gCavCount += snapshot;
                 if(type === 'siege') gSiegeCount += snapshot;
@@ -165,7 +161,6 @@ const HammerApp = {
             document.getElementById(projId).innerText = "+" + totalNew.toLocaleString();
             
             const grandTotal = snapshot + totalNew;
-            document.getElementById(outputTotalId).innerText = grandTotal.toLocaleString();
 
             // Update Counts
             if(type === 'infantry') gInfCount += grandTotal;
@@ -203,9 +198,10 @@ const HammerApp = {
             }
         };
 
-        processSection('infantry', 'unit_infantry', 'lvl_barracks', 'lvl_gb', 'snap_inf', infHelm, 'total_inf', 'lbl_inf', 'proj_inf');
-        processSection('cavalry', 'unit_cavalry', 'lvl_stable', 'lvl_gs', 'snap_cav', cavHelm, 'total_cav', 'lbl_cav', 'proj_cav');
-        processSection('siege', 'unit_siege', 'lvl_workshop', null, 'snap_siege', 0, 'total_siege', 'lbl_siege', 'proj_siege');
+        // Run for all 3 (Removed card footer IDs from arguments)
+        processSection('infantry', 'unit_infantry', 'lvl_barracks', 'lvl_gb', 'snap_inf', infHelm, 'lbl_inf_g', 'proj_inf');
+        processSection('cavalry', 'unit_cavalry', 'lvl_stable', 'lvl_gs', 'snap_cav', cavHelm, 'lbl_cav_g', 'proj_cav');
+        processSection('siege', 'unit_siege', 'lvl_workshop', null, 'snap_siege', 0, 'lbl_siege_g', 'proj_siege');
 
         // Update Globals
         document.getElementById('global_inf').innerText = gInfCount.toLocaleString();
@@ -223,12 +219,10 @@ const HammerApp = {
         document.getElementById('growth_crop').innerText = this.formatNumber(gCrop);
         document.getElementById('global_growth_cost').innerText = this.formatNumber(globalGrowthCost);
 
-        // Hammer Age
         const ageDays = Math.floor(maxBuildTimeSec / 86400);
         const ageHours = Math.floor((maxBuildTimeSec % 86400) / 3600);
         document.getElementById('hammer_age').innerText = `${ageDays}d ${ageHours}h`;
 
-        // Anvil Size (Integer Rounding)
         const requiredDefPoints = globalOff / 1.49;
         const anvilCrop = (requiredDefPoints / 50) * 1.15;
         document.getElementById('anvil_crop').innerText = Math.round(anvilCrop).toLocaleString();
