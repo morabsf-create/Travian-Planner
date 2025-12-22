@@ -34,14 +34,23 @@
 
         .results-box { 
             background: #333; color: #fff; padding: 25px; border-radius: 8px; 
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 30px;
+            display: grid; grid-template-columns: 1fr; gap: 20px;
         }
-        .res-stat h4 { margin: 0 0 5px 0; color: #aaa; font-size: 0.85rem; text-transform: uppercase; }
-        .res-stat .val { font-size: 1.8rem; font-weight: bold; font-family: 'Roboto', sans-serif; }
-        .res-stat .sub { font-size: 0.9rem; color: #ccc; }
         
-        /* Great Building Toggle Visuals */
-        .gb-active input { border-color: #859f51; background-color: #f1f8e9; }
+        /* Stats Grid */
+        .res-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 20px; margin-bottom: 20px; border-bottom: 1px solid #555; padding-bottom: 20px; }
+        .res-stat h4 { margin: 0 0 5px 0; color: #aaa; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; }
+        .res-stat .val { font-size: 1.5rem; font-weight: bold; font-family: 'Roboto', sans-serif; }
+        .res-stat .sub { font-size: 0.85rem; color: #ccc; margin-top: 2px; }
+
+        /* Breakdowns */
+        .breakdown-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
+        .bd-col h4 { color: #859f51; font-size: 0.9rem; margin-top: 0; margin-bottom: 10px; border-bottom: 1px solid #555; padding-bottom: 5px;}
+        .bd-row { display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 6px; color: #ddd; }
+        .bd-row span:last-child { font-weight: bold; color: #fff; }
+        
+        .res-icon { width: 16px; height: 16px; margin-right: 5px; vertical-align: middle; filter: grayscale(100%); opacity: 0.7; }
+
     </style>
 </head>
 <body>
@@ -74,17 +83,19 @@
         </div>
         <div>
             <label style="display:block; font-size:0.8rem; font-weight:bold; color:#777; margin-bottom:4px;">HELMET BONUS</label>
-            <div style="display:flex; align-items:center;">
-                <input type="number" id="helmet" value="0" min="0" max="100" style="width:100%; padding:8px; box-sizing:border-box;" oninput="TroopApp.calculate()">
-                <span style="margin-left:5px;">%</span>
-            </div>
+            <select id="helmet" style="width:100%; padding:8px;" onchange="TroopApp.calculate()">
+                <option value="0">0%</option>
+                <option value="10">10%</option>
+                <option value="15">15%</option>
+                <option value="20">20%</option>
+            </select>
         </div>
         <div>
             <label style="display:block; font-size:0.8rem; font-weight:bold; color:#777; margin-bottom:4px;">ARTIFACT</label>
             <select id="artifact" style="width:100%; padding:8px;" onchange="TroopApp.calculate()">
-                <option value="1.0">None</option>
-                <option value="0.75">Small (Train Faster)</option>
-                <option value="0.5">Large/Unique</option>
+                <option value="1.0">None (100% Time)</option>
+                <option value="0.75">Small (75% Time)</option>
+                <option value="0.5">Unique (50% Time)</option>
             </select>
         </div>
         <div>
@@ -101,7 +112,6 @@
     </div>
 
     <div class="training-grid">
-        
         <div class="train-card">
             <div class="card-header header-inf">
                 <span>⚔️ Infantry</span>
@@ -109,12 +119,10 @@
             </div>
             <div class="card-body">
                 <select id="unit_infantry" class="unit-select" onchange="TroopApp.calculate()"></select>
-                
                 <div class="input-row">
                     <label>Barracks Level</label>
                     <input type="number" id="lvl_barracks" value="20" min="0" max="20" oninput="TroopApp.calculate()">
                 </div>
-
                 <div class="sub-section">
                     <span class="sub-label">Great Barracks (3x Cost)</span>
                     <div class="input-row">
@@ -132,12 +140,10 @@
             </div>
             <div class="card-body">
                 <select id="unit_cavalry" class="unit-select" onchange="TroopApp.calculate()"></select>
-                
                 <div class="input-row">
                     <label>Stable Level</label>
                     <input type="number" id="lvl_stable" value="20" min="0" max="20" oninput="TroopApp.calculate()">
                 </div>
-
                 <div class="sub-section">
                     <span class="sub-label">Great Stable (3x Cost)</span>
                     <div class="input-row">
@@ -155,42 +161,52 @@
             </div>
             <div class="card-body">
                 <select id="unit_siege" class="unit-select" onchange="TroopApp.calculate()"></select>
-                
                 <div class="input-row">
                     <label>Workshop Level</label>
                     <input type="number" id="lvl_workshop" value="20" min="0" max="20" oninput="TroopApp.calculate()">
-                </div>
-                
-                <div class="sub-section">
-                    <span class="sub-label">Note</span>
-                    <div style="font-size: 0.85rem; color: #777;">
-                        Standard Travian servers do not have a "Great Workshop".
-                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <div class="results-box">
-        <div class="res-stat">
-            <h4>Total Units</h4>
-            <div class="val" id="res_total_units">0</div>
-            <div class="sub">Troops</div>
+        <div class="res-grid">
+            <div class="res-stat">
+                <h4>Total Units</h4>
+                <div class="val" id="res_total_units">0</div>
+            </div>
+            <div class="res-stat">
+                <h4>Total Cost</h4>
+                <div class="val" id="res_total_cost">0</div>
+            </div>
+            <div class="res-stat">
+                <h4>Crop Upkeep</h4>
+                <div class="val" id="res_upkeep" style="color:#ffcc80;">0</div>
+                <div class="sub">Per Hour</div>
+            </div>
+            <div class="res-stat">
+                <h4>Combat Power</h4>
+                <div class="sub">⚔️ <span id="res_off">0</span></div>
+                <div class="sub">🛡️ <span id="res_def">0</span></div>
+            </div>
         </div>
-        <div class="res-stat">
-            <h4>Total Cost</h4>
-            <div class="val" id="res_total_cost">0</div>
-            <div class="sub">Resources</div>
-        </div>
-        <div class="res-stat">
-            <h4>Crop Upkeep</h4>
-            <div class="val" id="res_upkeep" style="color:#ffcc80;">0</div>
-            <div class="sub">Per Hour</div>
-        </div>
-        <div class="res-stat">
-            <h4>Combat Power</h4>
-            <div class="sub">⚔️ <span id="res_off">0</span></div>
-            <div class="sub">🛡️ <span id="res_def">0</span></div>
+
+        <div class="breakdown-grid">
+            <div class="bd-col">
+                <h4>Resource Cost Breakdown</h4>
+                <div class="bd-row"><span>🌲 Wood</span><span id="bd_wood">0</span></div>
+                <div class="bd-row"><span>🧱 Clay</span><span id="bd_clay">0</span></div>
+                <div class="bd-row"><span>⚒️ Iron</span><span id="bd_iron">0</span></div>
+                <div class="bd-row"><span>🌾 Crop</span><span id="bd_crop">0</span></div>
+            </div>
+            <div class="bd-col">
+                <h4>Troop Source Breakdown</h4>
+                <div class="bd-row"><span>Barracks</span><span id="bd_barracks">0</span></div>
+                <div class="bd-row"><span>Gr. Barracks</span><span id="bd_gb">0</span></div>
+                <div class="bd-row"><span>Stable</span><span id="bd_stable">0</span></div>
+                <div class="bd-row"><span>Gr. Stable</span><span id="bd_gs">0</span></div>
+                <div class="bd-row"><span>Workshop</span><span id="bd_workshop">0</span></div>
+            </div>
         </div>
     </div>
 </div>
