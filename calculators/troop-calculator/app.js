@@ -10,6 +10,7 @@ const TroopApp = {
         }
         this.data = TROOP_DATA;
 
+        // 1. Populate Tribe
         const tribeSelect = document.getElementById('tribeSelect');
         Object.keys(this.data).forEach(tribe => {
             const opt = document.createElement('option');
@@ -18,7 +19,27 @@ const TroopApp = {
             tribeSelect.appendChild(opt);
         });
 
+        // 2. Populate Level Dropdowns (0-20)
+        // Standard Defaults to 20, Great Defaults to 0
+        this.populateLevelSelect('lvl_barracks', 20);
+        this.populateLevelSelect('lvl_gb', 0);
+        this.populateLevelSelect('lvl_stable', 20);
+        this.populateLevelSelect('lvl_gs', 0);
+        this.populateLevelSelect('lvl_workshop', 20);
+
         this.updateUnitDropdowns();
+    },
+
+    populateLevelSelect: function(id, defaultVal) {
+        const sel = document.getElementById(id);
+        sel.innerHTML = '';
+        for(let i=0; i<=20; i++) {
+            const opt = document.createElement('option');
+            opt.value = i;
+            opt.innerText = i;
+            if(i === defaultVal) opt.selected = true;
+            sel.appendChild(opt);
+        }
     },
 
     updateUnitDropdowns: function() {
@@ -63,16 +84,15 @@ const TroopApp = {
         const helmetInf = parseFloat(document.getElementById('inf_helmet').value) || 0;
         const helmetCav = parseFloat(document.getElementById('cav_helmet').value) || 0;
 
+        // Calc Queue
         const calcLine = (unitName, lvl, isGreat, helmetPercent) => {
-            // STRICT LIMIT: Max level 20
             if(!unitName || lvl <= 0) return { count: 0, w:0, c:0, i:0, cr:0, cu:0, off:0, def:0 };
             
             const unit = this.getUnitStats(tribe, unitName);
             if(!unit) return { count: 0, w:0, c:0, i:0, cr:0, cu:0, off:0, def:0 };
 
             const reductionFactor = (1 - (helmetPercent/100)) * (1 - allyBonus);
-            const safeLvl = Math.min(Math.max(lvl, 0), 20); // Force 0-20
-            const buildFactor = SPEED_FACTORS[safeLvl] || 1.0;
+            const buildFactor = SPEED_FACTORS[lvl] || 1.0;
 
             let timePerUnit = (unit.time / speed) * buildFactor * artifact * reductionFactor;
             if(timePerUnit < 1) timePerUnit = 1;
@@ -154,6 +174,26 @@ const TroopApp = {
         document.getElementById('global_upkeep').innerText = globalStats.cu.toLocaleString();
         document.getElementById('global_off').innerText = globalStats.off.toLocaleString();
         document.getElementById('global_def').innerText = globalStats.def.toLocaleString();
+
+        // --- PUSH VILLAGE CALC ---
+        // Definition: 4-4-4-6 L10 fields + all factories + Mill/Bakery + Plus
+        // Standard production 1x = 8400 total res/hr
+        // We scale this by server speed.
+        
+        if (durationHours > 0) {
+            const costPerHour = totalCost / durationHours;
+            const singleVillageProd = 8400 * speed; // Using the corrected 8400 figure
+            const villagesNeeded = costPerHour / singleVillageProd;
+            
+            // If the cost is 0, show 0. Otherwise format nicely.
+            if(totalCost > 0) {
+                document.getElementById('global_push_villages').innerText = villagesNeeded.toFixed(2);
+            } else {
+                document.getElementById('global_push_villages').innerText = "0";
+            }
+        } else {
+            document.getElementById('global_push_villages').innerText = "0";
+        }
     },
 
     sumStats: function(...args) {
