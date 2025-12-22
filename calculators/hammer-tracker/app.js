@@ -10,7 +10,6 @@ const HammerApp = {
         }
         this.data = TROOP_DATA;
 
-        // 1. Populate Tribe
         const tribeSelect = document.getElementById('tribeSelect');
         Object.keys(this.data).forEach(tribe => {
             const opt = document.createElement('option');
@@ -19,14 +18,12 @@ const HammerApp = {
             tribeSelect.appendChild(opt);
         });
 
-        // 2. Populate Levels
         this.populateLevelSelect('lvl_barracks', 20);
         this.populateLevelSelect('lvl_gb', 0);
         this.populateLevelSelect('lvl_stable', 20);
         this.populateLevelSelect('lvl_gs', 0);
         this.populateLevelSelect('lvl_workshop', 20);
 
-        // 3. Init Date Pickers
         const now = new Date();
         const yesterday = new Date(now.getTime() - (24 * 60 * 60 * 1000));
         
@@ -90,7 +87,6 @@ const HammerApp = {
     },
 
     calculate: function() {
-        // --- TIME CALCULATION ---
         const tSnap = new Date(document.getElementById('time_snapshot').value);
         const tTarget = new Date(document.getElementById('time_target').value);
         
@@ -100,12 +96,8 @@ const HammerApp = {
         const durationSec = diffMs / 1000;
         const days = Math.floor(durationSec / 86400);
         const hours = Math.floor((durationSec % 86400) / 3600);
-        const timeString = `${days}d ${hours}h`;
-        
-        document.getElementById('disp_elapsed').innerText = timeString;
-        document.getElementById('footer_time_span').innerText = timeString;
+        document.getElementById('disp_elapsed').innerText = `${days}d ${hours}h`;
 
-        // --- SETTINGS ---
         const tribe = document.getElementById('tribeSelect').value;
         const speed = parseFloat(document.getElementById('serverSpeed').value);
         const artifact = parseFloat(document.getElementById('artifact').value);
@@ -121,15 +113,12 @@ const HammerApp = {
         
         let gWood = 0, gClay = 0, gIron = 0, gCrop = 0;
         
-        // Trackers for Global Unit Counts
         let gInfCount = 0;
         let gCavCount = 0;
         let gSiegeCount = 0;
 
-        // Variables for Hammer Age (Time to build entire army)
         let maxBuildTimeSec = 0;
 
-        // --- CORE CALC LOGIC ---
         const processSection = (type, uId, lvlId, lvlGId, snapId, helm, outputTotalId, outputLabelId, projId) => {
             const unitName = document.getElementById(uId).value;
             const snapshot = parseInt(document.getElementById(snapId).value) || 0;
@@ -138,7 +127,7 @@ const HammerApp = {
 
             // Label Updates
             const labelEl = document.getElementById(outputLabelId);
-            const globalLabelEl = document.getElementById(outputLabelId + "_g"); // lbl_inf_g
+            const globalLabelEl = document.getElementById(outputLabelId + "_g"); 
             
             const displayLabel = unitName ? unitName.toUpperCase() : type.toUpperCase();
             if(labelEl) labelEl.innerText = displayLabel;
@@ -148,7 +137,7 @@ const HammerApp = {
                 document.getElementById(outputTotalId).innerText = snapshot.toLocaleString();
                 document.getElementById(projId).innerText = "+0";
                 
-                // Add snapshot to totals even if not training
+                // Track Snapshots even if not training
                 if(type === 'infantry') gInfCount += snapshot;
                 if(type === 'cavalry') gCavCount += snapshot;
                 if(type === 'siege') gSiegeCount += snapshot;
@@ -163,18 +152,16 @@ const HammerApp = {
                 const buildFactor = SPEED_FACTORS[level] || 1.0;
                 let timePerUnit = (unit.time / speed) * buildFactor * artifact * reductionFactor;
                 if(timePerUnit < 1) timePerUnit = 1;
-                return 1 / timePerUnit; // units per second
+                return 1 / timePerUnit; 
             };
 
             const rateStd = getRate(lvl);
             const rateGr = getRate(lvlG);
             
-            // New Troops
             const producedStd = Math.floor(rateStd * durationSec);
             const producedGr = Math.floor(rateGr * durationSec);
             const totalNew = producedStd + producedGr;
             
-            // Update UI
             document.getElementById(projId).innerText = "+" + totalNew.toLocaleString();
             
             const grandTotal = snapshot + totalNew;
@@ -209,25 +196,22 @@ const HammerApp = {
             globalGrowthCost += (wStd + wGr + cStd + cGr + iStd + iGr + crStd + crGr);
 
             // --- Hammer Age Calc ---
-            // Time to build GrandTotal using current infrastructure
             const totalRate = rateStd + rateGr; 
             if(totalRate > 0 && grandTotal > 0) {
-                const timeToBuild = grandTotal / totalRate; // Seconds
+                const timeToBuild = grandTotal / totalRate; 
                 if (timeToBuild > maxBuildTimeSec) maxBuildTimeSec = timeToBuild;
             }
         };
 
-        // Run for all 3
         processSection('infantry', 'unit_infantry', 'lvl_barracks', 'lvl_gb', 'snap_inf', infHelm, 'total_inf', 'lbl_inf', 'proj_inf');
         processSection('cavalry', 'unit_cavalry', 'lvl_stable', 'lvl_gs', 'snap_cav', cavHelm, 'total_cav', 'lbl_cav', 'proj_cav');
         processSection('siege', 'unit_siege', 'lvl_workshop', null, 'snap_siege', 0, 'total_siege', 'lbl_siege', 'proj_siege');
 
-        // Update Globals - Counts
+        // Update Globals
         document.getElementById('global_inf').innerText = gInfCount.toLocaleString();
         document.getElementById('global_cav').innerText = gCavCount.toLocaleString();
         document.getElementById('global_siege').innerText = gSiegeCount.toLocaleString();
 
-        // Update Globals - Stats
         document.getElementById('global_off').innerText = this.formatPoints(globalOff);
         document.getElementById('global_def_inf').innerText = this.formatPoints(globalDefInf);
         document.getElementById('global_def_cav').innerText = this.formatPoints(globalDefCav);
@@ -244,13 +228,10 @@ const HammerApp = {
         const ageHours = Math.floor((maxBuildTimeSec % 86400) / 3600);
         document.getElementById('hammer_age').innerText = `${ageDays}d ${ageHours}h`;
 
-        // Anvil Size (Approximate)
-        // Teuton Wall L20 = 49% bonus (1.49x)
-        // Avg Anvil Efficiency = 50 Def points per Crop
-        // Safety Margin = +15% (* 1.15)
+        // Anvil Size (Integer Rounding)
         const requiredDefPoints = globalOff / 1.49;
         const anvilCrop = (requiredDefPoints / 50) * 1.15;
-        document.getElementById('anvil_crop').innerText = this.formatPoints(anvilCrop);
+        document.getElementById('anvil_crop').innerText = Math.round(anvilCrop).toLocaleString();
     },
 
     formatNumber: function(num) {
