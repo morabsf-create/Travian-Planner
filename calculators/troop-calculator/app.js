@@ -1,92 +1,156 @@
+/* Project/calculators/troop-calculator/app.js */
+
 const TroopApp = {
+    // Cache for currently selected units to preserve selection across tribe changes if valid
+    data: null,
+
     init: function() {
+        // Load data from global variable defined in data.js
+        if(typeof TROOP_DATA === 'undefined') {
+            console.error("TROOP_DATA not found. Ensure data.js is loaded.");
+            return;
+        }
+        this.data = TROOP_DATA;
+
         // Populate Tribe Select
-        const select = document.getElementById('tribeSelect');
-        Object.keys(TROOP_DATA).forEach(tribe => {
+        const tribeSelect = document.getElementById('tribeSelect');
+        Object.keys(this.data).forEach(tribe => {
             const opt = document.createElement('option');
             opt.value = tribe;
             opt.innerText = tribe;
-            select.appendChild(opt);
+            tribeSelect.appendChild(opt);
         });
-        
-        // Initial Render
-        this.render();
+
+        // Trigger initial render
+        this.updateUnitDropdowns();
     },
 
-    getSettings: function() {
-        return {
-            tribe: document.getElementById('tribeSelect').value,
-            duration: parseFloat(document.getElementById('duration').value) || 0,
-            speed: parseFloat(document.getElementById('serverSpeed').value),
-            artifact: parseFloat(document.getElementById('artifact').value),
-            helmet: parseFloat(document.getElementById('helmet').value) || 0,
-            levels: {
-                "Barracks": parseInt(document.getElementById('lvl_Barracks').value) || 0,
-                "Stable": parseInt(document.getElementById('lvl_Stable').value) || 0,
-                "Workshop": parseInt(document.getElementById('lvl_Workshop').value) || 0
-            }
+    updateUnitDropdowns: function() {
+        const tribe = document.getElementById('tribeSelect').value;
+        const tribeUnits = this.data[tribe];
+
+        // Helper to populate a select element
+        const populate = (elementId, filterFn) => {
+            const el = document.getElementById(elementId);
+            el.innerHTML = '<option value="">-- None --</option>'; // Default empty
+            
+            tribeUnits.filter(filterFn).forEach((u, index) => {
+                const opt = document.createElement('option');
+                // Store index relative to the main tribe array to look up stats later
+                opt.value = u.name; 
+                opt.innerText = u.name; 
+                el.appendChild(opt);
+            });
+            // Auto-select first available unit for convenience? No, let user choose "None" or specific.
+            // Actually, for calculators, selecting the first unit is usually friendlier.
+            if(el.options.length > 1) el.selectedIndex = 1; 
         };
+
+        populate('unit_infantry', u => u.building === 'Barracks');
+        populate('unit_cavalry', u => u.building === 'Stable');
+        populate('unit_siege', u => u.building === 'Workshop');
+
+        this.calculate();
+    },
+
+    getUnitStats: function(tribe, unitName) {
+        if(!unitName) return null;
+        return this.data[tribe].find(u => u.name === unitName);
+    },
+
+    calculate: function() {
+        // 1. Gather Global Settings
+        const tribe = document.getElementById('tribeSelect').value;
+        const speed = parseFloat(document.getElementById('serverSpeed').value);
+        const durationHours = parseFloat(document.getElementById('duration').value) || 0;
+        const durationSec = durationHours * 3600;
+        
+        const artifact = parseFloat(document.getElementById('artifact').value);
+        const helmetPercent = parseFloat(document.getElementById('helmet').value) || 0;
+        const allyBonus = parseFloat(document.getElementById('allyBonus').value); // 0.0 to 0.10
+
+        // Modifiers
+        // Formula: BaseTime * (1 - Helmet%) * (1 - Ally%) ... (simplified stacking)
+        // Note: Artifact is a multiplier (0.75, 0.5), BuildFactor is multiplier.
+        // Helmet and Ally are reductions.
+        const reductionFactor = (1 - (helmetPercent/100)) * (1 - allyBonus);
+
+        let totalUnits = 0;
+        let totalCost = 0;
+        let totalUpkeep = 0;
+        let totalOff = 0;
+        let totalDef = 0;
+
+        // Helper Calculation Function
+        const calcQueue = (unitName, buildingLvl, isGreat) => {
+            if(!unitName || buildingLvl <= 0) return;
+            
+            const unit = this.getUnitStats(tribe, unitName);
+            if(!unit) return;
+
+            // Determine Building Speed Factor from data.js SPEED_FACTORS
+            // Cap level at 20
+            const safeLvl = Math.min(Math.max(buildingLvl, 0), 20);
+            const buildFactor = SPEED_FACTORS[safeLvl] || 1.0;
+
+            // Calculate Time Per Unit
+            // Base Time / Server Speed * Building Factor * Artifact * Modifiers
+            // Note: Great Buildings have same time as normal buildings, just 3x cost
+            let timePerUnit = (unit.time / speed) * buildFactor * artifact * reductionFactor;
+            
+            if(timePerUnit < 1) timePerUnit = 1; // Hard cap 1 second
+
+            // Calculate Quantity
+            const quantity = Math.floor(durationSec / timePerUnit);
+
+            // Add to Totals
+            totalUnits += quantity;
+            
+            // Cost (3x if Great)
+            const costMult = isGreat ? 3 : 1;
+            const singleCost = (unit.wood + unit.clay + unit.iron + unit.crop) * costMult;
+            totalCost += singleCost * quantity;
+
+            // Stats
+            totalUpkeep += unit.cu * quantity;
+            totalOff += unit.attack * quantity;
+            totalDef += (unit.def_inf + unit.def_cav) * quantity;
+        };
+
+        // 2. Process Infantry (Barracks + Great Barracks)
+        const infUnit = document.getElementById('unit_infantry').value;
+        const lvlBarracks = parseInt(document.getElementById('lvl_barracks').value) || 0;
+        const lvlGB = parseInt(document.getElementById('lvl_gb').value) || 0;
+        calcQueue(infUnit, lvlBarracks, false);
+        calcQueue(infUnit, lvlGB, true);
+
+        // 3. Process Cavalry (Stable + Great Stable)
+        const cavUnit = document.getElementById('unit_cavalry').value;
+        const lvlStable = parseInt(document.getElementById('lvl_stable').value) || 0;
+        const lvlGS = parseInt(document.getElementById('lvl_gs').value) || 0;
+        calcQueue(cavUnit, lvlStable, false);
+        calcQueue(cavUnit, lvlGS, true);
+
+        // 4. Process Siege (Workshop Only)
+        const siegeUnit = document.getElementById('unit_siege').value;
+        const lvlWorkshop = parseInt(document.getElementById('lvl_workshop').value) || 0;
+        calcQueue(siegeUnit, lvlWorkshop, false);
+
+        // 5. Update UI
+        document.getElementById('res_total_units').innerText = totalUnits.toLocaleString();
+        document.getElementById('res_total_cost').innerText = this.formatNumber(totalCost);
+        document.getElementById('res_upkeep').innerText = totalUpkeep.toLocaleString();
+        document.getElementById('res_off').innerText = totalOff.toLocaleString();
+        document.getElementById('res_def').innerText = totalDef.toLocaleString();
     },
 
     formatNumber: function(num) {
+        if (num >= 1000000) return (num / 1000000).toFixed(2) + 'M';
+        if (num >= 1000) return (num / 1000).toFixed(1) + 'k';
         return num.toLocaleString();
-    },
-
-    render: function() {
-        const settings = this.getSettings();
-        const units = TROOP_DATA[settings.tribe];
-        const tbody = document.getElementById('resultsBody');
-        tbody.innerHTML = '';
-
-        units.forEach(unit => {
-            // 1. Get Building Reduction
-            const bName = unit.building; // "Barracks", "Stable", "Workshop"
-            const level = settings.levels[bName] !== undefined ? settings.levels[bName] : 0;
-            const buildFactor = SPEED_FACTORS[Math.min(level, 20)] || 1.0;
-
-            // 2. Calculate Training Time (Seconds)
-            // Formula: (Base / Speed) * BuildFactor * Artifact * (1 - Helmet%)
-            let timePerUnit = (unit.time / settings.speed) * buildFactor * settings.artifact;
-            
-            // Helmet only applies to infantry/cavalry usually, but simple calculation applies generally or check unit type
-            // For simplicity, we apply helmet to all units if input is set
-            timePerUnit = timePerUnit * (1 - (settings.helmet / 100));
-
-            if (timePerUnit < 1) timePerUnit = 1; // Minimum 1 second cap (soft)
-
-            // 3. Calculate Quantity
-            const totalSeconds = settings.duration * 3600;
-            const quantity = Math.floor(totalSeconds / timePerUnit);
-
-            if (quantity <= 0) return;
-
-            // 4. Totals
-            const totalCost = (unit.wood + unit.clay + unit.iron + unit.crop) * quantity;
-            const totalUpkeep = unit.cu * quantity;
-            const totalOff = unit.attack * quantity;
-            const totalDef = (unit.def_inf + unit.def_cav) * quantity;
-
-            // 5. Render Row
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td><strong>${unit.name}</strong><br><small style="color:#888">${bName} Lv${level}</small></td>
-                <td style="font-size:1.2em; color:#859f51;">${this.formatNumber(quantity)}</td>
-                <td>
-                    ${this.formatNumber(totalCost)} Res<br>
-                    <small>(${this.formatNumber(unit.wood + unit.clay + unit.iron + unit.crop)} each)</small>
-                </td>
-                <td>
-                    ⚔️ ${this.formatNumber(totalOff)}<br>
-                    🛡️ ${this.formatNumber(totalDef)}
-                </td>
-                <td>🌾 ${this.formatNumber(totalUpkeep)}</td>
-            `;
-            tbody.appendChild(tr);
-        });
     }
 };
 
-// Start the app
 window.onload = function() {
     TroopApp.init();
 };

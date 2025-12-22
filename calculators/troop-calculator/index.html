@@ -7,100 +7,190 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Vollkorn:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../../css/style.css">
     <style>
-        .calc-grid { display: grid; grid-template-columns: 300px 1fr; gap: 20px; }
-        .panel { background: #fff; padding: 20px; border-radius: 8px; border: 1px solid #c9b7a2; }
-        .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; font-weight: bold; margin-bottom: 5px; color: #5e4b35; }
-        .form-group input, .form-group select { width: 100%; padding: 8px; border: 1px solid #c9b7a2; border-radius: 4px; }
-        .results-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        .results-table th, .results-table td { text-align: left; padding: 10px; border-bottom: 1px solid #eee; }
-        .results-table th { background-color: #f4f4f4; color: #5e4b35; }
-        .res-icon { width: 18px; vertical-align: middle; margin-right: 4px; }
-        @media (max-width: 768px) { .calc-grid { grid-template-columns: 1fr; } }
+        .calc-wrapper { max-width: 1200px; margin: 0 auto; }
+        .settings-bar { 
+            background: #fff; padding: 20px; border-radius: 8px; border: 1px solid #c9b7a2; 
+            margin-bottom: 25px; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px;
+        }
+        
+        .training-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-bottom: 25px; }
+        .train-card { background: #fff; border: 1px solid #c9b7a2; border-radius: 8px; overflow: hidden; }
+        .card-header { 
+            padding: 12px 15px; font-family: 'Vollkorn', serif; font-weight: bold; font-size: 1.1rem; 
+            border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;
+        }
+        .header-inf { background-color: #e8f5e9; color: #2e7d32; }
+        .header-cav { background-color: #fff3e0; color: #ef6c00; }
+        .header-sie { background-color: #f3e5f5; color: #7b1fa2; }
+        
+        .card-body { padding: 20px; }
+        .input-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+        .input-row label { font-size: 0.9rem; color: #555; font-weight: bold; }
+        .input-row input, .input-row select { padding: 6px; border: 1px solid #ccc; border-radius: 4px; width: 80px; }
+        .input-row select.unit-select { width: 100%; margin-bottom: 15px; padding: 8px; font-weight: bold; }
+
+        .sub-section { margin-top: 15px; padding-top: 15px; border-top: 1px dashed #ddd; }
+        .sub-label { display: block; font-size: 0.8rem; text-transform: uppercase; color: #999; margin-bottom: 8px; font-weight: bold; }
+
+        .results-box { 
+            background: #333; color: #fff; padding: 25px; border-radius: 8px; 
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 30px;
+        }
+        .res-stat h4 { margin: 0 0 5px 0; color: #aaa; font-size: 0.85rem; text-transform: uppercase; }
+        .res-stat .val { font-size: 1.8rem; font-weight: bold; font-family: 'Roboto', sans-serif; }
+        .res-stat .sub { font-size: 0.9rem; color: #ccc; }
+        
+        /* Great Building Toggle Visuals */
+        .gb-active input { border-color: #859f51; background-color: #f1f8e9; }
     </style>
 </head>
 <body>
 
-<div class="container">
+<div class="container calc-wrapper">
     <div style="margin-bottom: 20px;">
         <a href="../../index.html" style="text-decoration: none; color: #859f51; font-weight: bold;">&larr; Back to Hub</a>
     </div>
 
     <h1>Troop Training Calculator</h1>
-    <p>Calculate unit production over time based on building levels and server speed.</p>
-
-    <div class="calc-grid">
-        <div class="panel">
-            <h3>⚙️ Settings</h3>
-            
-            <div class="form-group">
-                <label>Tribe</label>
-                <select id="tribeSelect" onchange="TroopApp.render()"></select>
+    
+    <div class="settings-bar">
+        <div>
+            <label style="display:block; font-size:0.8rem; font-weight:bold; color:#777; margin-bottom:4px;">TRIBE</label>
+            <select id="tribeSelect" style="width:100%; padding:8px; font-weight:bold;" onchange="TroopApp.updateUnitDropdowns()"></select>
+        </div>
+        <div>
+            <label style="display:block; font-size:0.8rem; font-weight:bold; color:#777; margin-bottom:4px;">SERVER SPEED</label>
+            <select id="serverSpeed" style="width:100%; padding:8px;" onchange="TroopApp.calculate()">
+                <option value="1">1x</option>
+                <option value="2">2x</option>
+                <option value="3">3x</option>
+                <option value="5">5x</option>
+                <option value="10">10x</option>
+            </select>
+        </div>
+        <div>
+            <label style="display:block; font-size:0.8rem; font-weight:bold; color:#777; margin-bottom:4px;">DURATION (HOURS)</label>
+            <input type="number" id="duration" value="24" min="1" style="width:100%; padding:8px; box-sizing:border-box;" oninput="TroopApp.calculate()">
+        </div>
+        <div>
+            <label style="display:block; font-size:0.8rem; font-weight:bold; color:#777; margin-bottom:4px;">HELMET BONUS</label>
+            <div style="display:flex; align-items:center;">
+                <input type="number" id="helmet" value="0" min="0" max="100" style="width:100%; padding:8px; box-sizing:border-box;" oninput="TroopApp.calculate()">
+                <span style="margin-left:5px;">%</span>
             </div>
+        </div>
+        <div>
+            <label style="display:block; font-size:0.8rem; font-weight:bold; color:#777; margin-bottom:4px;">ARTIFACT</label>
+            <select id="artifact" style="width:100%; padding:8px;" onchange="TroopApp.calculate()">
+                <option value="1.0">None</option>
+                <option value="0.75">Small (Train Faster)</option>
+                <option value="0.5">Large/Unique</option>
+            </select>
+        </div>
+        <div>
+            <label style="display:block; font-size:0.8rem; font-weight:bold; color:#777; margin-bottom:4px;">ALLIANCE BONUS</label>
+            <select id="allyBonus" style="width:100%; padding:8px;" onchange="TroopApp.calculate()">
+                <option value="0">0%</option>
+                <option value="0.02">2%</option>
+                <option value="0.04">4%</option>
+                <option value="0.06">6%</option>
+                <option value="0.08">8%</option>
+                <option value="0.10">10%</option>
+            </select>
+        </div>
+    </div>
 
-            <div class="form-group">
-                <label>Time Duration (Hours)</label>
-                <input type="number" id="duration" value="24" min="1" oninput="TroopApp.render()">
+    <div class="training-grid">
+        
+        <div class="train-card">
+            <div class="card-header header-inf">
+                <span>⚔️ Infantry</span>
+                <small>Barracks</small>
             </div>
+            <div class="card-body">
+                <select id="unit_infantry" class="unit-select" onchange="TroopApp.calculate()"></select>
+                
+                <div class="input-row">
+                    <label>Barracks Level</label>
+                    <input type="number" id="lvl_barracks" value="20" min="0" max="20" oninput="TroopApp.calculate()">
+                </div>
 
-            <div class="form-group">
-                <label>Server Speed</label>
-                <select id="serverSpeed" onchange="TroopApp.render()">
-                    <option value="1">1x</option>
-                    <option value="2">2x</option>
-                    <option value="3">3x</option>
-                    <option value="5">5x</option>
-                </select>
-            </div>
-
-            <hr style="border-top: 1px solid #eee; margin: 15px 0;">
-
-            <div class="form-group">
-                <label>Barracks Level (0-20)</label>
-                <input type="number" id="lvl_Barracks" value="20" min="0" max="20" oninput="TroopApp.render()">
-            </div>
-            <div class="form-group">
-                <label>Stable Level (0-20)</label>
-                <input type="number" id="lvl_Stable" value="20" min="0" max="20" oninput="TroopApp.render()">
-            </div>
-            <div class="form-group">
-                <label>Workshop Level (0-20)</label>
-                <input type="number" id="lvl_Workshop" value="20" min="0" max="20" oninput="TroopApp.render()">
-            </div>
-
-            <hr style="border-top: 1px solid #eee; margin: 15px 0;">
-
-            <div class="form-group">
-                <label>Artifact Effect</label>
-                <select id="artifact" onchange="TroopApp.render()">
-                    <option value="1.0">None</option>
-                    <option value="0.75">Small (Train Faster)</option>
-                    <option value="0.5">Large/Unique</option>
-                </select>
-            </div>
-             <div class="form-group">
-                <label>Helmet Bonus (%)</label>
-                <input type="number" id="helmet" value="0" min="0" max="100" placeholder="e.g. 15" oninput="TroopApp.render()">
+                <div class="sub-section">
+                    <span class="sub-label">Great Barracks (3x Cost)</span>
+                    <div class="input-row">
+                        <label>Level (0 = Off)</label>
+                        <input type="number" id="lvl_gb" value="0" min="0" max="20" oninput="TroopApp.calculate()">
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div class="panel">
-            <h3>📊 Production Results</h3>
-            <div style="overflow-x: auto;">
-                <table class="results-table">
-                    <thead>
-                        <tr>
-                            <th>Unit</th>
-                            <th>Count</th>
-                            <th>Cost</th>
-                            <th>Power (Off/Def)</th>
-                            <th>Upkeep</th>
-                        </tr>
-                    </thead>
-                    <tbody id="resultsBody">
-                        </tbody>
-                </table>
+        <div class="train-card">
+            <div class="card-header header-cav">
+                <span>🐎 Cavalry</span>
+                <small>Stable</small>
             </div>
+            <div class="card-body">
+                <select id="unit_cavalry" class="unit-select" onchange="TroopApp.calculate()"></select>
+                
+                <div class="input-row">
+                    <label>Stable Level</label>
+                    <input type="number" id="lvl_stable" value="20" min="0" max="20" oninput="TroopApp.calculate()">
+                </div>
+
+                <div class="sub-section">
+                    <span class="sub-label">Great Stable (3x Cost)</span>
+                    <div class="input-row">
+                        <label>Level (0 = Off)</label>
+                        <input type="number" id="lvl_gs" value="0" min="0" max="20" oninput="TroopApp.calculate()">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="train-card">
+            <div class="card-header header-sie">
+                <span>🏚️ Siege</span>
+                <small>Workshop</small>
+            </div>
+            <div class="card-body">
+                <select id="unit_siege" class="unit-select" onchange="TroopApp.calculate()"></select>
+                
+                <div class="input-row">
+                    <label>Workshop Level</label>
+                    <input type="number" id="lvl_workshop" value="20" min="0" max="20" oninput="TroopApp.calculate()">
+                </div>
+                
+                <div class="sub-section">
+                    <span class="sub-label">Note</span>
+                    <div style="font-size: 0.85rem; color: #777;">
+                        Standard Travian servers do not have a "Great Workshop".
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="results-box">
+        <div class="res-stat">
+            <h4>Total Units</h4>
+            <div class="val" id="res_total_units">0</div>
+            <div class="sub">Troops</div>
+        </div>
+        <div class="res-stat">
+            <h4>Total Cost</h4>
+            <div class="val" id="res_total_cost">0</div>
+            <div class="sub">Resources</div>
+        </div>
+        <div class="res-stat">
+            <h4>Crop Upkeep</h4>
+            <div class="val" id="res_upkeep" style="color:#ffcc80;">0</div>
+            <div class="sub">Per Hour</div>
+        </div>
+        <div class="res-stat">
+            <h4>Combat Power</h4>
+            <div class="sub">⚔️ <span id="res_off">0</span></div>
+            <div class="sub">🛡️ <span id="res_def">0</span></div>
         </div>
     </div>
 </div>
