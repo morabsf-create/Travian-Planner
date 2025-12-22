@@ -9,16 +9,23 @@
     <style>
         .calc-wrapper { max-width: 1200px; margin: 0 auto; }
         
-        /* Settings Bar */
+        /* --- SETTINGS BAR --- */
         .settings-bar { 
-            background: #fff; padding: 20px; border-radius: 8px; border: 1px solid #c9b7a2; 
-            margin-bottom: 25px; display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 15px;
+            background: #fff; padding: 15px; border-radius: 8px; border: 1px solid #c9b7a2; 
+            margin-bottom: 20px; 
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 15px;
         }
-        .settings-bar label { display: block; font-size: 0.75rem; font-weight: bold; color: #777; margin-bottom: 4px; text-transform: uppercase; }
+        .settings-bar label { display: block; font-size: 0.7rem; font-weight: bold; color: #777; margin-bottom: 4px; text-transform: uppercase; }
         .settings-bar select, .settings-bar input { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-weight: bold; color: #333; box-sizing: border-box; }
 
-        /* Training Cards Grid */
-        .training-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 20px; margin-bottom: 40px; }
+        /* --- TRAINING CARDS --- */
+        /* Stacks on mobile, 3 columns on desktop */
+        .training-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
+            gap: 20px; 
+            margin-bottom: 40px; 
+        }
         
         .train-card { background: #fff; border: 1px solid #c9b7a2; border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; }
         .card-header { padding: 12px 15px; font-family: 'Vollkorn', serif; font-weight: bold; font-size: 1.1rem; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
@@ -28,59 +35,63 @@
 
         .card-body { padding: 20px; flex: 1; }
         
-        /* Unit Select & Helmet Row */
         .card-top-row { display: flex; gap: 10px; margin-bottom: 20px; }
         .unit-select { flex: 2; padding: 10px; font-size: 1rem; border: 1px solid #ccc; border-radius: 4px; font-weight: bold; }
         .helmet-select { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-weight: bold; color: #555; }
 
-        /* Input Rows inside Card */
-        .input-group { margin-bottom: 15px; border-bottom: 1px dashed #eee; padding-bottom: 15px; }
-        .input-group:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
-        
-        .input-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        /* Inputs */
+        .input-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px dashed #eee; }
+        .input-row:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
         .input-row label { font-size: 0.9rem; font-weight: bold; color: #555; }
-        .input-row input { width: 60px; padding: 5px; text-align: center; border: 1px solid #ccc; border-radius: 4px; }
-        
-        .output-row { display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; color: #666; background: #f9f9f9; padding: 6px 10px; border-radius: 4px; }
-        .output-val { font-weight: bold; color: #333; }
-        
-        /* Card Footer (Summary) */
-        .card-footer { background-color: #fafafa; border-top: 1px solid #eee; padding: 15px; font-size: 0.9rem; }
-        .summary-stats { display: flex; justify-content: space-between; margin-bottom: 12px; font-weight: bold; color: #333; }
-        .summary-stats .unit { font-weight: normal; margin-left: 2px; }
-        
-        .cost-grid { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 5px; font-size: 0.85rem; color: #555; background: #fff; padding: 8px; border: 1px solid #eee; border-radius: 4px; }
-        .cost-item { display: flex; flex-direction: column; align-items: center; }
-        .cost-item small { font-size: 0.7rem; color: #999; margin-bottom: 2px; }
+        .input-row input { width: 70px; padding: 6px; text-align: center; border: 1px solid #ccc; border-radius: 4px; font-weight: bold; }
 
-        /* Global Results Footer - TILES SYSTEM */
-        .results-section-title { color: #fff; margin-bottom: 15px; border-bottom: 1px solid #555; padding-bottom: 10px; font-family: 'Vollkorn', serif; }
-        .results-box { 
-            background: #333; color: #fff; padding: 25px; border-radius: 8px; 
-        }
+        /* --- CARD FOOTER (TILES) --- */
+        .card-footer { background-color: #fafafa; border-top: 1px solid #eee; padding: 15px; }
+        .footer-tiles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin-top: 10px; }
         
-        .tiles-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; }
+        /* Mini Tile Style */
+        .mini-tile { 
+            background: #fff; border: 1px solid #eee; border-radius: 4px; padding: 5px; 
+            text-align: center; display: flex; flex-direction: column; justify-content: center;
+        }
+        .mini-tile label { font-size: 0.65rem; color: #999; text-transform: uppercase; margin-bottom: 2px; }
+        .mini-tile span { font-size: 0.85rem; font-weight: bold; color: #555; font-family: 'Roboto', sans-serif; }
+        
+        .main-stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+        .stat-box { background: #fff; border: 1px solid #ddd; padding: 8px; border-radius: 4px; text-align: center; }
+        .stat-box label { display: block; font-size: 0.7rem; color: #888; text-transform: uppercase; }
+        .stat-box span { font-weight: bold; color: #333; font-size: 1rem; }
+
+        /* --- GLOBAL SUMMARY --- */
+        .results-box { background: #333; color: #fff; padding: 20px; border-radius: 8px; }
+        .summary-group { margin-bottom: 25px; }
+        .summary-group:last-child { margin-bottom: 0; }
+        .group-title { font-size: 0.85rem; text-transform: uppercase; color: #859f51; border-bottom: 1px solid #555; padding-bottom: 5px; margin-bottom: 10px; letter-spacing: 1px; font-weight: bold; }
+        
+        .tiles-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }
         
         .stat-tile { 
-            background: rgba(255,255,255,0.1); border-radius: 6px; padding: 12px; 
+            background: rgba(255,255,255,0.08); border-radius: 6px; padding: 12px; 
             display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
-            border: 1px solid rgba(255,255,255,0.05); transition: background 0.2s;
+            border: 1px solid rgba(255,255,255,0.05);
         }
-        .stat-tile:hover { background: rgba(255,255,255,0.15); }
-        
-        .tile-label { font-size: 0.7rem; text-transform: uppercase; color: #aaa; margin-bottom: 5px; letter-spacing: 0.5px; }
+        .tile-label { font-size: 0.7rem; text-transform: uppercase; color: #aaa; margin-bottom: 5px; }
         .tile-val { font-size: 1.1rem; font-weight: bold; font-family: 'Roboto', sans-serif; }
-        .tile-sub { font-size: 0.75rem; color: #888; margin-top: 3px; }
+        
+        /* Colors */
+        .c-wood { color: #a5d6a7; }
+        .c-clay { color: #ffcc80; }
+        .c-iron { color: #b0bec5; }
+        .c-crop { color: #fff59d; }
+        .c-off { color: #ffab91; }
+        .c-def { color: #90caf9; }
+        .c-upkeep { color: #fff59d; }
 
-        /* Specific Tile Colors */
-        .tile-wood .tile-val { color: #a5d6a7; }
-        .tile-clay .tile-val { color: #ffcc80; }
-        .tile-iron .tile-val { color: #b0bec5; }
-        .tile-crop .tile-val { color: #fff59d; }
-        .tile-cost .tile-val { color: #fff; }
-        .tile-upkeep .tile-val { color: #ffab91; }
-        .tile-unit .tile-val { color: #81d4fa; }
-
+        @media (max-width: 600px) {
+            .training-grid { grid-template-columns: 1fr; }
+            .card-top-row { flex-direction: column; gap: 10px; }
+            .helmet-select, .unit-select { width: 100%; }
+        }
     </style>
 </head>
 <body>
@@ -142,7 +153,7 @@
             <div class="card-body">
                 <div class="card-top-row">
                     <select id="unit_infantry" class="unit-select" onchange="TroopApp.calculate()"></select>
-                    <select id="inf_helmet" class="helmet-select" onchange="TroopApp.calculate()" title="Helmet Bonus">
+                    <select id="inf_helmet" class="helmet-select" onchange="TroopApp.calculate()">
                         <option value="0">Helm: 0%</option>
                         <option value="10">Helm: 10%</option>
                         <option value="15">Helm: 15%</option>
@@ -150,38 +161,31 @@
                     </select>
                 </div>
                 
-                <div class="input-group">
-                    <div class="input-row">
-                        <label>Barracks Level</label>
-                        <input type="number" id="lvl_barracks" value="20" min="0" max="20" oninput="TroopApp.calculate()">
-                    </div>
-                    <div class="output-row">
-                        <span>Output</span>
-                        <span class="output-val" id="out_inf_std">0</span>
-                    </div>
+                <div class="input-row">
+                    <label>Barracks Level</label>
+                    <input type="number" id="lvl_barracks" value="20" min="0" max="20" oninput="TroopApp.calculate()">
                 </div>
-
-                <div class="input-group">
-                    <div class="input-row">
-                        <label>Great Barracks Level</label>
-                        <input type="number" id="lvl_gb" value="0" min="0" max="20" oninput="TroopApp.calculate()">
-                    </div>
-                    <div class="output-row">
-                        <span>Output</span>
-                        <span class="output-val" id="out_inf_gb">0</span>
-                    </div>
+                <div class="input-row">
+                    <label>Great Barracks Level</label>
+                    <input type="number" id="lvl_gb" value="0" min="0" max="20" oninput="TroopApp.calculate()">
                 </div>
             </div>
             <div class="card-footer">
-                <div class="summary-stats">
-                    <div class="stat-item">Total: <span id="inf_total_units">0</span></div>
-                    <div class="stat-item">Upkeep: <span id="inf_upkeep">0</span><span class="unit">/h</span></div>
+                <div class="main-stats-row">
+                    <div class="stat-box">
+                        <label>Units Trained</label>
+                        <span id="inf_total_units" style="color:#2e7d32;">0</span>
+                    </div>
+                    <div class="stat-box">
+                        <label>Upkeep /h</label>
+                        <span id="inf_upkeep" style="color:#f57c00;">0</span>
+                    </div>
                 </div>
-                <div class="cost-grid">
-                    <div class="cost-item"><small>🌲 Wood</small><span id="inf_wood">0</span></div>
-                    <div class="cost-item"><small>🧱 Clay</small><span id="inf_clay">0</span></div>
-                    <div class="cost-item"><small>⚒️ Iron</small><span id="inf_iron">0</span></div>
-                    <div class="cost-item"><small>🌾 Crop</small><span id="inf_crop">0</span></div>
+                <div class="footer-tiles">
+                    <div class="mini-tile"><label>Wood</label><span id="inf_wood">0</span></div>
+                    <div class="mini-tile"><label>Clay</label><span id="inf_clay">0</span></div>
+                    <div class="mini-tile"><label>Iron</label><span id="inf_iron">0</span></div>
+                    <div class="mini-tile"><label>Crop</label><span id="inf_crop">0</span></div>
                 </div>
             </div>
         </div>
@@ -194,7 +198,7 @@
             <div class="card-body">
                 <div class="card-top-row">
                     <select id="unit_cavalry" class="unit-select" onchange="TroopApp.calculate()"></select>
-                    <select id="cav_helmet" class="helmet-select" onchange="TroopApp.calculate()" title="Helmet Bonus">
+                    <select id="cav_helmet" class="helmet-select" onchange="TroopApp.calculate()">
                         <option value="0">Helm: 0%</option>
                         <option value="10">Helm: 10%</option>
                         <option value="15">Helm: 15%</option>
@@ -202,38 +206,31 @@
                     </select>
                 </div>
                 
-                <div class="input-group">
-                    <div class="input-row">
-                        <label>Stable Level</label>
-                        <input type="number" id="lvl_stable" value="20" min="0" max="20" oninput="TroopApp.calculate()">
-                    </div>
-                    <div class="output-row">
-                        <span>Output</span>
-                        <span class="output-val" id="out_cav_std">0</span>
-                    </div>
+                <div class="input-row">
+                    <label>Stable Level</label>
+                    <input type="number" id="lvl_stable" value="20" min="0" max="20" oninput="TroopApp.calculate()">
                 </div>
-
-                <div class="input-group">
-                    <div class="input-row">
-                        <label>Great Stable Level</label>
-                        <input type="number" id="lvl_gs" value="0" min="0" max="20" oninput="TroopApp.calculate()">
-                    </div>
-                    <div class="output-row">
-                        <span>Output</span>
-                        <span class="output-val" id="out_cav_gs">0</span>
-                    </div>
+                <div class="input-row">
+                    <label>Great Stable Level</label>
+                    <input type="number" id="lvl_gs" value="0" min="0" max="20" oninput="TroopApp.calculate()">
                 </div>
             </div>
             <div class="card-footer">
-                <div class="summary-stats">
-                    <div class="stat-item">Total: <span id="cav_total_units">0</span></div>
-                    <div class="stat-item">Upkeep: <span id="cav_upkeep">0</span><span class="unit">/h</span></div>
+                <div class="main-stats-row">
+                    <div class="stat-box">
+                        <label>Units Trained</label>
+                        <span id="cav_total_units" style="color:#ef6c00;">0</span>
+                    </div>
+                    <div class="stat-box">
+                        <label>Upkeep /h</label>
+                        <span id="cav_upkeep" style="color:#f57c00;">0</span>
+                    </div>
                 </div>
-                <div class="cost-grid">
-                    <div class="cost-item"><small>🌲 Wood</small><span id="cav_wood">0</span></div>
-                    <div class="cost-item"><small>🧱 Clay</small><span id="cav_clay">0</span></div>
-                    <div class="cost-item"><small>⚒️ Iron</small><span id="cav_iron">0</span></div>
-                    <div class="cost-item"><small>🌾 Crop</small><span id="cav_crop">0</span></div>
+                <div class="footer-tiles">
+                    <div class="mini-tile"><label>Wood</label><span id="cav_wood">0</span></div>
+                    <div class="mini-tile"><label>Clay</label><span id="cav_clay">0</span></div>
+                    <div class="mini-tile"><label>Iron</label><span id="cav_iron">0</span></div>
+                    <div class="mini-tile"><label>Crop</label><span id="cav_crop">0</span></div>
                 </div>
             </div>
         </div>
@@ -246,86 +243,94 @@
             <div class="card-body">
                 <select id="unit_siege" class="unit-select" onchange="TroopApp.calculate()"></select>
                 
-                <div class="input-group">
-                    <div class="input-row">
-                        <label>Workshop Level</label>
-                        <input type="number" id="lvl_workshop" value="20" min="0" max="20" oninput="TroopApp.calculate()">
-                    </div>
-                    <div class="output-row">
-                        <span>Output</span>
-                        <span class="output-val" id="out_siege_std">0</span>
-                    </div>
+                <div class="input-row">
+                    <label>Workshop Level</label>
+                    <input type="number" id="lvl_workshop" value="20" min="0" max="20" oninput="TroopApp.calculate()">
                 </div>
-                <div style="height: 125px;"></div> 
+                <div style="height: 60px;"></div> 
             </div>
             <div class="card-footer">
-                <div class="summary-stats">
-                    <div class="stat-item">Total: <span id="siege_total_units">0</span></div>
-                    <div class="stat-item">Upkeep: <span id="siege_upkeep">0</span><span class="unit">/h</span></div>
+                <div class="main-stats-row">
+                    <div class="stat-box">
+                        <label>Units Trained</label>
+                        <span id="siege_total_units" style="color:#7b1fa2;">0</span>
+                    </div>
+                    <div class="stat-box">
+                        <label>Upkeep /h</label>
+                        <span id="siege_upkeep" style="color:#f57c00;">0</span>
+                    </div>
                 </div>
-                <div class="cost-grid">
-                    <div class="cost-item"><small>🌲 Wood</small><span id="siege_wood">0</span></div>
-                    <div class="cost-item"><small>🧱 Clay</small><span id="siege_clay">0</span></div>
-                    <div class="cost-item"><small>⚒️ Iron</small><span id="siege_iron">0</span></div>
-                    <div class="cost-item"><small>🌾 Crop</small><span id="siege_crop">0</span></div>
+                <div class="footer-tiles">
+                    <div class="mini-tile"><label>Wood</label><span id="siege_wood">0</span></div>
+                    <div class="mini-tile"><label>Clay</label><span id="siege_clay">0</span></div>
+                    <div class="mini-tile"><label>Iron</label><span id="siege_iron">0</span></div>
+                    <div class="mini-tile"><label>Crop</label><span id="siege_crop">0</span></div>
                 </div>
             </div>
         </div>
     </div>
 
     <div class="results-box">
-        <h3 class="results-section-title">Global Summary</h3>
-        <div class="tiles-grid">
-            <div class="stat-tile tile-unit">
-                <span class="tile-label" id="lbl_inf">INFANTRY</span>
-                <span class="tile-val" id="global_inf">0</span>
-            </div>
-            <div class="stat-tile tile-unit">
-                <span class="tile-label" id="lbl_cav">CAVALRY</span>
-                <span class="tile-val" id="global_cav">0</span>
-            </div>
-            <div class="stat-tile tile-unit">
-                <span class="tile-label" id="lbl_siege">SIEGE</span>
-                <span class="tile-val" id="global_siege">0</span>
-            </div>
-
-            <div class="stat-tile tile-upkeep">
-                <span class="tile-label">TOTAL UPKEEP</span>
-                <span class="tile-val"><span id="global_upkeep">0</span>/h</span>
-            </div>
-
-            <div class="stat-tile tile-cost" style="grid-column: span 2;">
-                <span class="tile-label">TOTAL RESOURCE COST</span>
-                <span class="tile-val" id="global_cost">0</span>
-            </div>
-
-             <div class="stat-tile">
-                <span class="tile-label">OFFENSE</span>
-                <span class="tile-val" id="global_off">0</span>
-            </div>
-             <div class="stat-tile">
-                <span class="tile-label">DEFENSE</span>
-                <span class="tile-val" id="global_def">0</span>
+        
+        <div class="summary-group">
+            <div class="group-title">Army Strength & Power</div>
+            <div class="tiles-grid">
+                <div class="stat-tile">
+                    <span class="tile-label" id="lbl_inf">INFANTRY</span>
+                    <span class="tile-val" id="global_inf">0</span>
+                </div>
+                <div class="stat-tile">
+                    <span class="tile-label" id="lbl_cav">CAVALRY</span>
+                    <span class="tile-val" id="global_cav">0</span>
+                </div>
+                <div class="stat-tile">
+                    <span class="tile-label" id="lbl_siege">SIEGE</span>
+                    <span class="tile-val" id="global_siege">0</span>
+                </div>
+                <div class="stat-tile">
+                    <span class="tile-label">OFFENSE</span>
+                    <span class="tile-val c-off" id="global_off">0</span>
+                </div>
+                <div class="stat-tile">
+                    <span class="tile-label">DEFENSE</span>
+                    <span class="tile-val c-def" id="global_def">0</span>
+                </div>
             </div>
         </div>
 
-        <h4 style="color:#aaa; font-size:0.8rem; text-transform:uppercase; margin-top:20px; border-bottom:1px solid #444; padding-bottom:5px;">Resource Breakdown</h4>
-        <div class="tiles-grid" style="margin-top:10px;">
-             <div class="stat-tile tile-wood">
-                <span class="tile-label">🌲 WOOD</span>
-                <span class="tile-val" id="gc_wood">0</span>
+        <div class="summary-group">
+            <div class="group-title">Economics Overview</div>
+            <div class="tiles-grid">
+                <div class="stat-tile">
+                    <span class="tile-label">TOTAL UPKEEP</span>
+                    <span class="tile-val c-upkeep"><span id="global_upkeep">0</span>/h</span>
+                </div>
+                <div class="stat-tile" style="grid-column: span 2;">
+                    <span class="tile-label">TOTAL COST</span>
+                    <span class="tile-val" id="global_cost">0</span>
+                </div>
             </div>
-             <div class="stat-tile tile-clay">
-                <span class="tile-label">🧱 CLAY</span>
-                <span class="tile-val" id="gc_clay">0</span>
-            </div>
-             <div class="stat-tile tile-iron">
-                <span class="tile-label">⚒️ IRON</span>
-                <span class="tile-val" id="gc_iron">0</span>
-            </div>
-             <div class="stat-tile tile-crop">
-                <span class="tile-label">🌾 CROP</span>
-                <span class="tile-val" id="gc_crop">0</span>
+        </div>
+
+        <div class="summary-group">
+            <div class="group-title">Resource Breakdown</div>
+            <div class="tiles-grid" style="grid-template-columns: repeat(4, 1fr);">
+                 <div class="stat-tile">
+                    <span class="tile-label">🌲 WOOD</span>
+                    <span class="tile-val c-wood" id="gc_wood">0</span>
+                </div>
+                 <div class="stat-tile">
+                    <span class="tile-label">🧱 CLAY</span>
+                    <span class="tile-val c-clay" id="gc_clay">0</span>
+                </div>
+                 <div class="stat-tile">
+                    <span class="tile-label">⚒️ IRON</span>
+                    <span class="tile-val c-iron" id="gc_iron">0</span>
+                </div>
+                 <div class="stat-tile">
+                    <span class="tile-label">🌾 CROP</span>
+                    <span class="tile-val c-crop" id="gc_crop">0</span>
+                </div>
             </div>
         </div>
 

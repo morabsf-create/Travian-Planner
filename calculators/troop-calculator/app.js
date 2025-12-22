@@ -10,7 +10,6 @@ const TroopApp = {
         }
         this.data = TROOP_DATA;
 
-        // Populate Tribe Select
         const tribeSelect = document.getElementById('tribeSelect');
         Object.keys(this.data).forEach(tribe => {
             const opt = document.createElement('option');
@@ -19,23 +18,16 @@ const TroopApp = {
             tribeSelect.appendChild(opt);
         });
 
-        // Trigger initial render
         this.updateUnitDropdowns();
     },
 
     updateUnitDropdowns: function() {
         const tribe = document.getElementById('tribeSelect').value;
         const tribeUnits = this.data[tribe];
-
         if (!tribeUnits) return;
 
-        // Expansion units to exclude
-        const excludeList = [
-            "Senator", "Chief", "Chieftain", "Nomarch", "Logades", "Ephor", "Jarl",
-            "Settler"
-        ];
+        const excludeList = ["Senator", "Chief", "Chieftain", "Nomarch", "Logades", "Ephor", "Jarl", "Settler"];
 
-        // Helper to populate a select element
         const populate = (elementId, filterFn) => {
             const el = document.getElementById(elementId);
             el.innerHTML = '<option value="">-- None --</option>'; 
@@ -62,30 +54,24 @@ const TroopApp = {
     },
 
     calculate: function() {
-        // 1. Gather Global Settings
         const tribe = document.getElementById('tribeSelect').value;
         const speed = parseFloat(document.getElementById('serverSpeed').value);
         const durationHours = parseFloat(document.getElementById('duration').value) || 0;
         const durationSec = durationHours * 3600;
-        
         const artifact = parseFloat(document.getElementById('artifact').value);
         const allyBonus = parseFloat(document.getElementById('allyBonus').value); 
-
-        // Specific Helmet Bonuses (Now inside specific cards)
         const helmetInf = parseFloat(document.getElementById('inf_helmet').value) || 0;
         const helmetCav = parseFloat(document.getElementById('cav_helmet').value) || 0;
 
-        // --- Helper to Calc Specific Line ---
         const calcLine = (unitName, lvl, isGreat, helmetPercent) => {
+            // STRICT LIMIT: Max level 20
             if(!unitName || lvl <= 0) return { count: 0, w:0, c:0, i:0, cr:0, cu:0, off:0, def:0 };
             
             const unit = this.getUnitStats(tribe, unitName);
             if(!unit) return { count: 0, w:0, c:0, i:0, cr:0, cu:0, off:0, def:0 };
 
-            // Modifiers
             const reductionFactor = (1 - (helmetPercent/100)) * (1 - allyBonus);
-
-            const safeLvl = Math.min(Math.max(lvl, 0), 20);
+            const safeLvl = Math.min(Math.max(lvl, 0), 20); // Force 0-20
             const buildFactor = SPEED_FACTORS[safeLvl] || 1.0;
 
             let timePerUnit = (unit.time / speed) * buildFactor * artifact * reductionFactor;
@@ -107,15 +93,11 @@ const TroopApp = {
             };
         };
 
-        // --- INFANTRY (Uses inf_helmet) ---
+        // --- INFANTRY ---
         const infUnitName = document.getElementById('unit_infantry').value;
         const infStd = calcLine(infUnitName, parseInt(document.getElementById('lvl_barracks').value)||0, false, helmetInf);
         const infGb  = calcLine(infUnitName, parseInt(document.getElementById('lvl_gb').value)||0, true, helmetInf);
         const infStats = this.sumStats(infStd, infGb);
-        
-        // Update DOM - Infantry
-        document.getElementById('out_inf_std').innerText = infStd.count.toLocaleString();
-        document.getElementById('out_inf_gb').innerText = infGb.count.toLocaleString();
         
         document.getElementById('inf_total_units').innerText = infStats.count.toLocaleString();
         document.getElementById('inf_upkeep').innerText = infStats.cu.toLocaleString();
@@ -124,18 +106,13 @@ const TroopApp = {
         document.getElementById('inf_iron').innerText = this.formatNumber(infStats.i);
         document.getElementById('inf_crop').innerText = this.formatNumber(infStats.cr);
         
-        // Dynamic Label for Global Summary
         document.getElementById('lbl_inf').innerText = infUnitName ? infUnitName.toUpperCase() : "INFANTRY";
 
-
-        // --- CAVALRY (Uses cav_helmet) ---
+        // --- CAVALRY ---
         const cavUnitName = document.getElementById('unit_cavalry').value;
         const cavStd = calcLine(cavUnitName, parseInt(document.getElementById('lvl_stable').value)||0, false, helmetCav);
         const cavGs  = calcLine(cavUnitName, parseInt(document.getElementById('lvl_gs').value)||0, true, helmetCav);
         const cavStats = this.sumStats(cavStd, cavGs);
-        
-        document.getElementById('out_cav_std').innerText = cavStd.count.toLocaleString();
-        document.getElementById('out_cav_gs').innerText = cavGs.count.toLocaleString();
 
         document.getElementById('cav_total_units').innerText = cavStats.count.toLocaleString();
         document.getElementById('cav_upkeep').innerText = cavStats.cu.toLocaleString();
@@ -144,15 +121,11 @@ const TroopApp = {
         document.getElementById('cav_iron').innerText = this.formatNumber(cavStats.i);
         document.getElementById('cav_crop').innerText = this.formatNumber(cavStats.cr);
 
-        // Dynamic Label
         document.getElementById('lbl_cav').innerText = cavUnitName ? cavUnitName.toUpperCase() : "CAVALRY";
 
-
-        // --- SIEGE (No helmet) ---
+        // --- SIEGE ---
         const siegeUnitName = document.getElementById('unit_siege').value;
-        const siegeStd = calcLine(siegeUnitName, parseInt(document.getElementById('lvl_workshop').value)||0, false, 0); // 0% Helmet
-        
-        document.getElementById('out_siege_std').innerText = siegeStd.count.toLocaleString();
+        const siegeStd = calcLine(siegeUnitName, parseInt(document.getElementById('lvl_workshop').value)||0, false, 0); 
         
         document.getElementById('siege_total_units').innerText = siegeStd.count.toLocaleString();
         document.getElementById('siege_upkeep').innerText = siegeStd.cu.toLocaleString();
@@ -161,11 +134,9 @@ const TroopApp = {
         document.getElementById('siege_iron').innerText = this.formatNumber(siegeStd.i);
         document.getElementById('siege_crop').innerText = this.formatNumber(siegeStd.cr);
 
-        // Dynamic Label
         document.getElementById('lbl_siege').innerText = siegeUnitName ? siegeUnitName.toUpperCase() : "SIEGE";
 
-
-        // --- GLOBAL TOTALS ---
+        // --- GLOBAL ---
         const globalStats = this.sumStats(infStats, cavStats, siegeStd);
         
         document.getElementById('global_inf').innerText = infStats.count.toLocaleString();
@@ -175,7 +146,6 @@ const TroopApp = {
         const totalCost = globalStats.w + globalStats.c + globalStats.i + globalStats.cr;
         document.getElementById('global_cost').innerText = this.formatNumber(totalCost);
         
-        // Global Resource Breakdown
         document.getElementById('gc_wood').innerText = this.formatNumber(globalStats.w);
         document.getElementById('gc_clay').innerText = this.formatNumber(globalStats.c);
         document.getElementById('gc_iron').innerText = this.formatNumber(globalStats.i);
