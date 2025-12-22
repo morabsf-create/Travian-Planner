@@ -8,7 +8,13 @@
     <link rel="stylesheet" href="css/style.css">
     <style>
         /* Specific styles for the Hub Menu */
-        .hub-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; margin-top: 30px; }
+        /* Updated minmax to 280px for better fit on small mobile screens */
+        .hub-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
+            gap: 20px; 
+            margin-top: 30px; 
+        }
         .tool-card {
             background: white; border: 1px solid #c9b7a2; border-radius: 8px; padding: 25px;
             transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; text-decoration: none; color: inherit;
@@ -39,6 +45,14 @@
                 <div class="tool-title">Troop Training Calculator</div>
                 <div class="tool-desc">
                     Calculate unit production over time based on building levels and server settings.
+                </div>
+            </a>
+
+            <a href="calculators/hammer-tracker/index.html" class="tool-card">
+                <span class="tool-icon">🎯</span>
+                <div class="tool-title">Hammer Tracker</div>
+                <div class="tool-desc">
+                    Project current enemy troop counts based on historic spy reports and growth estimates.
                 </div>
             </a>
         </div>
