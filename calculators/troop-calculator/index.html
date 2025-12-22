@@ -45,7 +45,7 @@
         .footer-title { font-size: 0.75rem; text-transform: uppercase; color: #999; font-weight: bold; margin-bottom: 8px; letter-spacing: 1px; }
         
         .summary-stats { display: flex; justify-content: space-between; margin-bottom: 12px; font-weight: bold; color: #333; }
-        .stat-item span { display: block; font-size: 0.75rem; color: #777; font-weight: normal; }
+        .summary-stats .unit { font-weight: normal; margin-left: 2px; }
         
         .cost-grid { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 5px; font-size: 0.85rem; color: #555; background: #fff; padding: 8px; border: 1px solid #eee; border-radius: 4px; }
         .cost-item { display: flex; flex-direction: column; align-items: center; }
@@ -64,6 +64,11 @@
 
         .breakdown-row { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 0.95rem; }
         .breakdown-row span:last-child { font-weight: bold; color: #859f51; }
+
+        .global-cost-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 10px; }
+        .gc-item { background: rgba(255,255,255,0.1); padding: 8px; border-radius: 4px; text-align: center; }
+        .gc-label { display: block; font-size: 0.75rem; color: #aaa; margin-bottom: 2px; text-transform: uppercase; }
+        .gc-val { font-size: 1.1rem; font-weight: bold; font-family: 'Roboto', sans-serif; }
 
     </style>
 </head>
@@ -93,11 +98,20 @@
         </div>
         <div>
             <label>DURATION (HOURS)</label>
-            <input type="number" id="duration" value="24" min="1" oninput="TroopApp.calculate()">
+            <input type="number" id="duration" value="1" min="1" oninput="TroopApp.calculate()">
         </div>
         <div>
-            <label>HELMET BONUS</label>
-            <select id="helmet" onchange="TroopApp.calculate()">
+            <label>INF. HELMET</label>
+            <select id="inf_helmet" onchange="TroopApp.calculate()">
+                <option value="0">0%</option>
+                <option value="10">10%</option>
+                <option value="15">15%</option>
+                <option value="20">20%</option>
+            </select>
+        </div>
+        <div>
+            <label>CAV. HELMET</label>
+            <select id="cav_helmet" onchange="TroopApp.calculate()">
                 <option value="0">0%</option>
                 <option value="10">10%</option>
                 <option value="15">15%</option>
@@ -141,7 +155,7 @@
                         <input type="number" id="lvl_barracks" value="20" min="0" max="20" oninput="TroopApp.calculate()">
                     </div>
                     <div class="output-row">
-                        <span>👉 Output</span>
+                        <span>Output</span>
                         <span class="output-val" id="out_inf_std">0</span>
                     </div>
                 </div>
@@ -152,7 +166,7 @@
                         <input type="number" id="lvl_gb" value="0" min="0" max="20" oninput="TroopApp.calculate()">
                     </div>
                     <div class="output-row">
-                        <span>👉 Output</span>
+                        <span>Output</span>
                         <span class="output-val" id="out_inf_gb">0</span>
                     </div>
                 </div>
@@ -161,7 +175,7 @@
                 <div class="footer-title">Infantry Summary</div>
                 <div class="summary-stats">
                     <div class="stat-item">Total: <span id="inf_total_units">0</span></div>
-                    <div class="stat-item">Upkeep: <span id="inf_upkeep">0</span>/hr</div>
+                    <div class="stat-item">Upkeep: <span id="inf_upkeep">0</span><span class="unit">/h</span></div>
                 </div>
                 <div class="cost-grid">
                     <div class="cost-item"><small>🌲 Wood</small><span id="inf_wood">0</span></div>
@@ -186,7 +200,7 @@
                         <input type="number" id="lvl_stable" value="20" min="0" max="20" oninput="TroopApp.calculate()">
                     </div>
                     <div class="output-row">
-                        <span>👉 Output</span>
+                        <span>Output</span>
                         <span class="output-val" id="out_cav_std">0</span>
                     </div>
                 </div>
@@ -197,7 +211,7 @@
                         <input type="number" id="lvl_gs" value="0" min="0" max="20" oninput="TroopApp.calculate()">
                     </div>
                     <div class="output-row">
-                        <span>👉 Output</span>
+                        <span>Output</span>
                         <span class="output-val" id="out_cav_gs">0</span>
                     </div>
                 </div>
@@ -206,7 +220,7 @@
                 <div class="footer-title">Cavalry Summary</div>
                 <div class="summary-stats">
                     <div class="stat-item">Total: <span id="cav_total_units">0</span></div>
-                    <div class="stat-item">Upkeep: <span id="cav_upkeep">0</span>/hr</div>
+                    <div class="stat-item">Upkeep: <span id="cav_upkeep">0</span><span class="unit">/h</span></div>
                 </div>
                 <div class="cost-grid">
                     <div class="cost-item"><small>🌲 Wood</small><span id="cav_wood">0</span></div>
@@ -231,7 +245,7 @@
                         <input type="number" id="lvl_workshop" value="20" min="0" max="20" oninput="TroopApp.calculate()">
                     </div>
                     <div class="output-row">
-                        <span>👉 Output</span>
+                        <span>Output</span>
                         <span class="output-val" id="out_siege_std">0</span>
                     </div>
                 </div>
@@ -241,7 +255,7 @@
                 <div class="footer-title">Siege Summary</div>
                 <div class="summary-stats">
                     <div class="stat-item">Total: <span id="siege_total_units">0</span></div>
-                    <div class="stat-item">Upkeep: <span id="siege_upkeep">0</span>/hr</div>
+                    <div class="stat-item">Upkeep: <span id="siege_upkeep">0</span><span class="unit">/h</span></div>
                 </div>
                 <div class="cost-grid">
                     <div class="cost-item"><small>🌲 Wood</small><span id="siege_wood">0</span></div>
@@ -263,21 +277,25 @@
                     <div class="breakdown-row"><span>🏚️ Siege:</span> <span id="global_siege">0</span></div>
                 </div>
             </div>
-            <div class="g-stat">
-                <h4>Resource Totals</h4>
-                <div class="g-val" id="global_cost">0</div>
-                <div class="g-sub">Total Cost</div>
-            </div>
-            <div class="g-stat">
-                <h4>Total Upkeep</h4>
-                <div class="g-val" style="color:#ffcc80;" id="global_upkeep">0</div>
-                <div class="g-sub">Per Hour</div>
+            <div class="g-stat" style="grid-column: span 2;">
+                <h4>Total Resource Cost</h4>
+                <div class="g-val" id="global_cost" style="font-size: 1.5rem; color: #859f51;">0</div>
+                
+                <div class="global-cost-grid">
+                    <div class="gc-item"><span class="gc-label">🌲 Wood</span><span class="gc-val" id="gc_wood">0</span></div>
+                    <div class="gc-item"><span class="gc-label">🧱 Clay</span><span class="gc-val" id="gc_clay">0</span></div>
+                    <div class="gc-item"><span class="gc-label">⚒️ Iron</span><span class="gc-val" id="gc_iron">0</span></div>
+                    <div class="gc-item"><span class="gc-label">🌾 Crop</span><span class="gc-val" id="gc_crop">0</span></div>
+                </div>
             </div>
             <div class="g-stat">
                 <h4>Combat Power</h4>
                 <div class="g-val" style="flex-direction:column; align-items:flex-start;">
                     <div style="font-size:1rem;">⚔️ <span id="global_off">0</span></div>
                     <div style="font-size:1rem;">🛡️ <span id="global_def">0</span></div>
+                </div>
+                <div class="g-sub" style="margin-top:10px;">
+                    Upkeep: <span id="global_upkeep" style="color:#ffcc80; font-weight:bold;">0</span>/h
                 </div>
             </div>
         </div>

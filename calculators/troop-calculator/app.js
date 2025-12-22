@@ -69,18 +69,21 @@ const TroopApp = {
         const durationSec = durationHours * 3600;
         
         const artifact = parseFloat(document.getElementById('artifact').value);
-        const helmetPercent = parseFloat(document.getElementById('helmet').value) || 0;
         const allyBonus = parseFloat(document.getElementById('allyBonus').value); 
 
-        // Modifiers
-        const reductionFactor = (1 - (helmetPercent/100)) * (1 - allyBonus);
+        // Specific Helmet Bonuses
+        const helmetInf = parseFloat(document.getElementById('inf_helmet').value) || 0;
+        const helmetCav = parseFloat(document.getElementById('cav_helmet').value) || 0;
 
         // --- Helper to Calc Specific Line ---
-        const calcLine = (unitName, lvl, isGreat) => {
+        const calcLine = (unitName, lvl, isGreat, helmetPercent) => {
             if(!unitName || lvl <= 0) return { count: 0, w:0, c:0, i:0, cr:0, cu:0, off:0, def:0 };
             
             const unit = this.getUnitStats(tribe, unitName);
             if(!unit) return { count: 0, w:0, c:0, i:0, cr:0, cu:0, off:0, def:0 };
+
+            // Modifiers
+            const reductionFactor = (1 - (helmetPercent/100)) * (1 - allyBonus);
 
             const safeLvl = Math.min(Math.max(lvl, 0), 20);
             const buildFactor = SPEED_FACTORS[safeLvl] || 1.0;
@@ -104,15 +107,12 @@ const TroopApp = {
             };
         };
 
-        // --- INFANTRY ---
+        // --- INFANTRY (Uses inf_helmet) ---
         const infUnit = document.getElementById('unit_infantry').value;
-        const infStd = calcLine(infUnit, parseInt(document.getElementById('lvl_barracks').value)||0, false);
-        const infGb  = calcLine(infUnit, parseInt(document.getElementById('lvl_gb').value)||0, true);
-        
-        // Sum Infantry
+        const infStd = calcLine(infUnit, parseInt(document.getElementById('lvl_barracks').value)||0, false, helmetInf);
+        const infGb  = calcLine(infUnit, parseInt(document.getElementById('lvl_gb').value)||0, true, helmetInf);
         const infStats = this.sumStats(infStd, infGb);
         
-        // Update DOM - Infantry
         document.getElementById('out_inf_std').innerText = infStd.count.toLocaleString();
         document.getElementById('out_inf_gb').innerText = infGb.count.toLocaleString();
         
@@ -123,16 +123,12 @@ const TroopApp = {
         document.getElementById('inf_iron').innerText = this.formatNumber(infStats.i);
         document.getElementById('inf_crop').innerText = this.formatNumber(infStats.cr);
 
-
-        // --- CAVALRY ---
+        // --- CAVALRY (Uses cav_helmet) ---
         const cavUnit = document.getElementById('unit_cavalry').value;
-        const cavStd = calcLine(cavUnit, parseInt(document.getElementById('lvl_stable').value)||0, false);
-        const cavGs  = calcLine(cavUnit, parseInt(document.getElementById('lvl_gs').value)||0, true);
-        
-        // Sum Cavalry
+        const cavStd = calcLine(cavUnit, parseInt(document.getElementById('lvl_stable').value)||0, false, helmetCav);
+        const cavGs  = calcLine(cavUnit, parseInt(document.getElementById('lvl_gs').value)||0, true, helmetCav);
         const cavStats = this.sumStats(cavStd, cavGs);
         
-        // Update DOM - Cavalry
         document.getElementById('out_cav_std').innerText = cavStd.count.toLocaleString();
         document.getElementById('out_cav_gs').innerText = cavGs.count.toLocaleString();
 
@@ -143,12 +139,10 @@ const TroopApp = {
         document.getElementById('cav_iron').innerText = this.formatNumber(cavStats.i);
         document.getElementById('cav_crop').innerText = this.formatNumber(cavStats.cr);
 
-
-        // --- SIEGE ---
+        // --- SIEGE (No helmet) ---
         const siegeUnit = document.getElementById('unit_siege').value;
-        const siegeStd = calcLine(siegeUnit, parseInt(document.getElementById('lvl_workshop').value)||0, false);
+        const siegeStd = calcLine(siegeUnit, parseInt(document.getElementById('lvl_workshop').value)||0, false, 0); // 0% Helmet
         
-        // Update DOM - Siege
         document.getElementById('out_siege_std').innerText = siegeStd.count.toLocaleString();
         
         document.getElementById('siege_total_units').innerText = siegeStd.count.toLocaleString();
@@ -157,7 +151,6 @@ const TroopApp = {
         document.getElementById('siege_clay').innerText = this.formatNumber(siegeStd.c);
         document.getElementById('siege_iron').innerText = this.formatNumber(siegeStd.i);
         document.getElementById('siege_crop').innerText = this.formatNumber(siegeStd.cr);
-
 
         // --- GLOBAL TOTALS ---
         const globalStats = this.sumStats(infStats, cavStats, siegeStd);
@@ -168,8 +161,14 @@ const TroopApp = {
         
         const totalCost = globalStats.w + globalStats.c + globalStats.i + globalStats.cr;
         document.getElementById('global_cost').innerText = this.formatNumber(totalCost);
-        document.getElementById('global_upkeep').innerText = globalStats.cu.toLocaleString();
         
+        // Global Resource Breakdown
+        document.getElementById('gc_wood').innerText = this.formatNumber(globalStats.w);
+        document.getElementById('gc_clay').innerText = this.formatNumber(globalStats.c);
+        document.getElementById('gc_iron').innerText = this.formatNumber(globalStats.i);
+        document.getElementById('gc_crop').innerText = this.formatNumber(globalStats.cr);
+
+        document.getElementById('global_upkeep').innerText = globalStats.cu.toLocaleString();
         document.getElementById('global_off').innerText = globalStats.off.toLocaleString();
         document.getElementById('global_def').innerText = globalStats.def.toLocaleString();
     },
