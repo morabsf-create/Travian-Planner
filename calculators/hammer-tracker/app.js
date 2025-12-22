@@ -100,7 +100,10 @@ const HammerApp = {
         const durationSec = diffMs / 1000;
         const days = Math.floor(durationSec / 86400);
         const hours = Math.floor((durationSec % 86400) / 3600);
-        document.getElementById('disp_elapsed').innerText = `${days}d ${hours}h`;
+        const timeString = `${days}d ${hours}h`;
+        
+        document.getElementById('disp_elapsed').innerText = timeString;
+        document.getElementById('footer_time_span').innerText = timeString;
 
         // --- SETTINGS ---
         const tribe = document.getElementById('tribeSelect').value;
@@ -115,13 +118,19 @@ const HammerApp = {
         let globalDefCav = 0;
         let globalUpkeep = 0;
         let globalGrowthCost = 0;
+        
         let gWood = 0, gClay = 0, gIron = 0, gCrop = 0;
+        
+        // Trackers for Global Unit Counts
+        let gInfCount = 0;
+        let gCavCount = 0;
+        let gSiegeCount = 0;
 
         // Variables for Hammer Age (Time to build entire army)
         let maxBuildTimeSec = 0;
 
         // --- CORE CALC LOGIC ---
-        const processSection = (uId, lvlId, lvlGId, snapId, helm, outputTotalId, outputLabelId, projId) => {
+        const processSection = (type, uId, lvlId, lvlGId, snapId, helm, outputTotalId, outputLabelId, projId) => {
             const unitName = document.getElementById(uId).value;
             const snapshot = parseInt(document.getElementById(snapId).value) || 0;
             const lvl = parseInt(document.getElementById(lvlId).value) || 0;
@@ -129,16 +138,20 @@ const HammerApp = {
 
             // Label Updates
             const labelEl = document.getElementById(outputLabelId);
-            if(unitName) labelEl.innerText = unitName.toUpperCase();
-            else {
-                if(outputLabelId.includes('inf')) labelEl.innerText = "INFANTRY";
-                else if(outputLabelId.includes('cav')) labelEl.innerText = "CAVALRY";
-                else labelEl.innerText = "SIEGE";
-            }
+            const globalLabelEl = document.getElementById(outputLabelId + "_g"); // lbl_inf_g
+            
+            const displayLabel = unitName ? unitName.toUpperCase() : type.toUpperCase();
+            if(labelEl) labelEl.innerText = displayLabel;
+            if(globalLabelEl) globalLabelEl.innerText = displayLabel;
 
             if(!unitName) {
                 document.getElementById(outputTotalId).innerText = snapshot.toLocaleString();
                 document.getElementById(projId).innerText = "+0";
+                
+                // Add snapshot to totals even if not training
+                if(type === 'infantry') gInfCount += snapshot;
+                if(type === 'cavalry') gCavCount += snapshot;
+                if(type === 'siege') gSiegeCount += snapshot;
                 return;
             }
 
@@ -167,6 +180,11 @@ const HammerApp = {
             const grandTotal = snapshot + totalNew;
             document.getElementById(outputTotalId).innerText = grandTotal.toLocaleString();
 
+            // Update Counts
+            if(type === 'infantry') gInfCount += grandTotal;
+            if(type === 'cavalry') gCavCount += grandTotal;
+            if(type === 'siege') gSiegeCount += grandTotal;
+
             // Stats
             globalOff += grandTotal * unit.attack;
             globalDefInf += grandTotal * unit.def_inf;
@@ -174,16 +192,21 @@ const HammerApp = {
             globalUpkeep += grandTotal * unit.cu;
 
             // Cost (Growth Only)
-            const singleCost = unit.wood + unit.clay + unit.iron + unit.crop;
-            const costStd = producedStd * singleCost;
-            const costGr = producedGr * (singleCost * 3);
+            const wStd = producedStd * unit.wood;
+            const cStd = producedStd * unit.clay;
+            const iStd = producedStd * unit.iron;
+            const crStd = producedStd * unit.crop;
+            
+            const wGr = producedGr * unit.wood * 3;
+            const cGr = producedGr * unit.clay * 3;
+            const iGr = producedGr * unit.iron * 3;
+            const crGr = producedGr * unit.crop * 3;
 
-            // Resource Breakdown (Growth)
-            gWood += (producedStd * unit.wood) + (producedGr * unit.wood * 3);
-            gClay += (producedStd * unit.clay) + (producedGr * unit.clay * 3);
-            gIron += (producedStd * unit.iron) + (producedGr * unit.iron * 3);
-            gCrop += (producedStd * unit.crop) + (producedGr * unit.crop * 3);
-            globalGrowthCost += (costStd + costGr);
+            gWood += (wStd + wGr);
+            gClay += (cStd + cGr);
+            gIron += (iStd + iGr);
+            gCrop += (crStd + crGr);
+            globalGrowthCost += (wStd + wGr + cStd + cGr + iStd + iGr + crStd + crGr);
 
             // --- Hammer Age Calc ---
             // Time to build GrandTotal using current infrastructure
@@ -194,11 +217,17 @@ const HammerApp = {
             }
         };
 
-        processSection('unit_infantry', 'lvl_barracks', 'lvl_gb', 'snap_inf', infHelm, 'total_inf', 'lbl_inf', 'proj_inf');
-        processSection('unit_cavalry', 'lvl_stable', 'lvl_gs', 'snap_cav', cavHelm, 'total_cav', 'lbl_cav', 'proj_cav');
-        processSection('unit_siege', 'lvl_workshop', null, 'snap_siege', 0, 'total_siege', 'lbl_siege', 'proj_siege');
+        // Run for all 3
+        processSection('infantry', 'unit_infantry', 'lvl_barracks', 'lvl_gb', 'snap_inf', infHelm, 'total_inf', 'lbl_inf', 'proj_inf');
+        processSection('cavalry', 'unit_cavalry', 'lvl_stable', 'lvl_gs', 'snap_cav', cavHelm, 'total_cav', 'lbl_cav', 'proj_cav');
+        processSection('siege', 'unit_siege', 'lvl_workshop', null, 'snap_siege', 0, 'total_siege', 'lbl_siege', 'proj_siege');
 
-        // Update Globals
+        // Update Globals - Counts
+        document.getElementById('global_inf').innerText = gInfCount.toLocaleString();
+        document.getElementById('global_cav').innerText = gCavCount.toLocaleString();
+        document.getElementById('global_siege').innerText = gSiegeCount.toLocaleString();
+
+        // Update Globals - Stats
         document.getElementById('global_off').innerText = this.formatPoints(globalOff);
         document.getElementById('global_def_inf').innerText = this.formatPoints(globalDefInf);
         document.getElementById('global_def_cav').innerText = this.formatPoints(globalDefCav);
@@ -218,8 +247,9 @@ const HammerApp = {
         // Anvil Size (Approximate)
         // Teuton Wall L20 = 49% bonus (1.49x)
         // Avg Anvil Efficiency = 50 Def points per Crop
+        // Safety Margin = +15% (* 1.15)
         const requiredDefPoints = globalOff / 1.49;
-        const anvilCrop = requiredDefPoints / 50;
+        const anvilCrop = (requiredDefPoints / 50) * 1.15;
         document.getElementById('anvil_crop').innerText = this.formatPoints(anvilCrop);
     },
 

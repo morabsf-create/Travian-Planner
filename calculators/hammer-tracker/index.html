@@ -73,7 +73,6 @@
         /* Global Summary Tiles */
         .results-box { background: #333; color: #fff; padding: 20px; border-radius: 8px; }
         
-        /* Increased spacing between groups */
         .summary-group { margin-bottom: 30px; }
         .summary-group:last-child { margin-bottom: 0; }
         
@@ -107,8 +106,8 @@
             .time-bar { flex-direction: column; align-items: stretch; gap: 15px; }
             .time-display { text-align: left; margin-top: 10px; border-top: 1px solid #bbdefb; padding-top: 15px; }
             
-            /* Mobile response: Ensure 2 columns for better readability */
             .res-breakdown-grid { grid-template-columns: 1fr 1fr; } 
+            .footer-tiles { grid-template-columns: 1fr 1fr; }
             .mobile-2col { grid-template-columns: 1fr 1fr !important; }
         }
     </style>
@@ -302,30 +301,30 @@
             <div class="group-title">Projected Army Strength</div>
             <div class="tiles-grid" style="grid-template-columns: repeat(3, 1fr);">
                 <div class="stat-tile">
-                    <span class="tile-label" id="lbl_inf">INFANTRY</span>
+                    <span class="tile-label" id="lbl_inf_g">INFANTRY</span>
                     <span class="tile-val" id="global_inf">0</span>
                 </div>
                 <div class="stat-tile">
-                    <span class="tile-label" id="lbl_cav">CAVALRY</span>
+                    <span class="tile-label" id="lbl_cav_g">CAVALRY</span>
                     <span class="tile-val" id="global_cav">0</span>
                 </div>
                 <div class="stat-tile">
-                    <span class="tile-label" id="lbl_siege">SIEGE</span>
+                    <span class="tile-label" id="lbl_siege_g">SIEGE</span>
                     <span class="tile-val" id="global_siege">0</span>
                 </div>
             </div>
             <div class="tiles-grid mobile-2col" style="margin-top:10px; grid-template-columns: repeat(4, 1fr);">
                 <div class="stat-tile">
                     <span class="tile-label">TOTAL OFFENSE</span>
-                    <span class="tile-val c-off" id="global_off">0</span>
+                    <span class="tile-val c-off" id="global_off">0k</span>
                 </div>
                 <div class="stat-tile">
                     <span class="tile-label">DEFENSE VS INFANTRY</span>
-                    <span class="tile-val c-def" id="global_def_inf">0</span>
+                    <span class="tile-val c-def" id="global_def_inf">0k</span>
                 </div>
                 <div class="stat-tile">
                     <span class="tile-label">DEFENSE VS CAVALRY</span>
-                    <span class="tile-val c-def" id="global_def_cav">0</span>
+                    <span class="tile-val c-def" id="global_def_cav">0k</span>
                 </div>
                 <div class="stat-tile">
                     <span class="tile-label">TOTAL UPKEEP</span>
@@ -365,9 +364,9 @@
                     <span class="tile-sub">Cumulative Time</span>
                 </div>
                 <div class="stat-tile">
-                    <span class="tile-label">EST. ANVIL SIZE</span>
+                    <span class="tile-label">ANVIL TO KILL (CROP)</span>
                     <span class="tile-val c-crop" id="anvil_crop">0</span>
-                    <span class="tile-sub">Crop to Defend</span>
+                    <span class="tile-sub">Def + 15% Safety</span>
                 </div>
             </div>
         </div>
