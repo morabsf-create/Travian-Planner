@@ -92,7 +92,8 @@
             .helmet-select, .unit-select { width: 100%; }
             .res-breakdown-grid { grid-template-columns: 1fr 1fr; } 
             .footer-tiles { grid-template-columns: 1fr 1fr; }
-            .tiles-grid { grid-template-columns: 1fr 1fr; }
+            /* Force tiles to stack nicely on mobile */
+            .tiles-grid { grid-template-columns: 1fr 1fr !important; }
         }
     </style>
 </head>
@@ -280,7 +281,7 @@
         
         <div class="summary-group">
             <div class="group-title">Army Strength & Power</div>
-            <div class="tiles-grid" style="grid-template-columns: repeat(4, 1fr);">
+            <div class="tiles-grid" style="grid-template-columns: repeat(3, 1fr);">
                 <div class="stat-tile">
                     <span class="tile-label" id="lbl_inf">INFANTRY</span>
                     <span class="tile-val" id="global_inf">0</span>
@@ -293,19 +294,19 @@
                     <span class="tile-label" id="lbl_siege">SIEGE</span>
                     <span class="tile-val" id="global_siege">0</span>
                 </div>
-                <div class="stat-tile">
-                    <span class="tile-label">OFFENSE</span>
-                    <span class="tile-val c-off" id="global_off">0k</span>
-                </div>
             </div>
-            <div class="tiles-grid" style="margin-top:10px; grid-template-columns: 1fr 1fr;">
+            <div class="tiles-grid" style="grid-template-columns: repeat(3, 1fr); margin-top: 10px;">
                 <div class="stat-tile">
-                    <span class="tile-label">DEF VS INF.</span>
-                    <span class="tile-val c-def" id="global_def_inf">0k</span>
+                    <span class="tile-label">TOTAL OFFENSE</span>
+                    <span class="tile-val c-off" id="global_off">0</span>
                 </div>
                 <div class="stat-tile">
-                    <span class="tile-label">DEF VS CAV.</span>
-                    <span class="tile-val c-def" id="global_def_cav">0k</span>
+                    <span class="tile-label">DEFENSE VS INFANTRY</span>
+                    <span class="tile-val c-def" id="global_def_inf">0</span>
+                </div>
+                <div class="stat-tile">
+                    <span class="tile-label">DEFENSE VS CAVALRY</span>
+                    <span class="tile-val c-def" id="global_def_cav">0</span>
                 </div>
             </div>
         </div>

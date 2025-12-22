@@ -128,11 +128,21 @@ const HammerApp = {
             const lvl = parseInt(document.getElementById(lvlId).value) || 0;
             const lvlG = lvlGId ? (parseInt(document.getElementById(lvlGId).value) || 0) : 0; 
 
-            document.getElementById(outputLabelId).innerText = unitName ? unitName : "Units";
+            // Label Updates
+            const labelEl = document.getElementById(outputLabelId);
+            if(unitName) labelEl.innerText = unitName.toUpperCase();
+            else {
+                if(outputLabelId.includes('inf')) labelEl.innerText = "INFANTRY";
+                else if(outputLabelId.includes('cav')) labelEl.innerText = "CAVALRY";
+                else labelEl.innerText = "SIEGE";
+            }
 
             if(!unitName) {
                 document.getElementById(outputTotalId).innerText = snapshot.toLocaleString();
                 document.getElementById(projId).innerText = "+0";
+                // Even without new troops, snapshot contributes to totals
+                // But we don't know stats if no unit selected!
+                // Assuming 0 stats if no unit selected.
                 return;
             }
 

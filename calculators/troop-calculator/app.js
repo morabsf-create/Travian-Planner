@@ -168,9 +168,11 @@ const TroopApp = {
         document.getElementById('gc_crop').innerText = this.formatNumber(globalStats.cr);
 
         document.getElementById('global_upkeep').innerText = globalStats.cu.toLocaleString();
-        document.getElementById('global_off').innerText = this.formatPoints(globalStats.off);
-        document.getElementById('global_def_inf').innerText = this.formatPoints(globalStats.defInf);
-        document.getElementById('global_def_cav').innerText = this.formatPoints(globalStats.defCav);
+        
+        // Exact numbers for combat power
+        document.getElementById('global_off').innerText = globalStats.off.toLocaleString();
+        document.getElementById('global_def_inf').innerText = globalStats.defInf.toLocaleString();
+        document.getElementById('global_def_cav').innerText = globalStats.defCav.toLocaleString();
 
         // --- PUSH VILLAGE CALC ---
         if (durationHours > 0) {
@@ -207,12 +209,6 @@ const TroopApp = {
     formatNumber: function(num) {
         if (num >= 1000000) return (num / 1000000).toFixed(2) + 'M';
         if (num >= 1000) return (num / 1000).toFixed(1) + 'k';
-        return num.toLocaleString();
-    },
-
-    formatPoints: function(num) {
-        if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
-        if (num >= 1000) return (num / 1000).toFixed(0) + 'k';
         return num.toLocaleString();
     }
 };
