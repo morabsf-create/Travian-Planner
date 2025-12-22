@@ -111,8 +111,6 @@ const HammerApp = {
         let globalUpkeep = 0;
         let globalGrowthCost = 0;
         
-        let gWood = 0, gClay = 0, gIron = 0, gCrop = 0;
-        
         let gInfCount = 0;
         let gCavCount = 0;
         let gSiegeCount = 0;
@@ -125,7 +123,7 @@ const HammerApp = {
             const lvl = parseInt(document.getElementById(lvlId).value) || 0;
             const lvlG = lvlGId ? (parseInt(document.getElementById(lvlGId).value) || 0) : 0; 
 
-            // Update Label in Global Section
+            // Update Label
             const globalLabelEl = document.getElementById(globalLabelId); 
             const displayLabel = unitName ? unitName.toUpperCase() : type.toUpperCase();
             if(globalLabelEl) globalLabelEl.innerText = displayLabel;
@@ -133,7 +131,6 @@ const HammerApp = {
             if(!unitName) {
                 document.getElementById(projId).innerText = "+0";
                 
-                // Track Snapshots
                 if(type === 'infantry') gInfCount += snapshot;
                 if(type === 'cavalry') gCavCount += snapshot;
                 if(type === 'siege') gSiegeCount += snapshot;
@@ -174,21 +171,10 @@ const HammerApp = {
             globalUpkeep += grandTotal * unit.cu;
 
             // Cost (Growth Only)
-            const wStd = producedStd * unit.wood;
-            const cStd = producedStd * unit.clay;
-            const iStd = producedStd * unit.iron;
-            const crStd = producedStd * unit.crop;
-            
-            const wGr = producedGr * unit.wood * 3;
-            const cGr = producedGr * unit.clay * 3;
-            const iGr = producedGr * unit.iron * 3;
-            const crGr = producedGr * unit.crop * 3;
-
-            gWood += (wStd + wGr);
-            gClay += (cStd + cGr);
-            gIron += (iStd + iGr);
-            gCrop += (crStd + crGr);
-            globalGrowthCost += (wStd + wGr + cStd + cGr + iStd + iGr + crStd + crGr);
+            const singleCost = unit.wood + unit.clay + unit.iron + unit.crop;
+            const costStd = producedStd * singleCost;
+            const costGr = producedGr * (singleCost * 3);
+            globalGrowthCost += (costStd + costGr);
 
             // --- Hammer Age Calc ---
             const totalRate = rateStd + rateGr; 
@@ -198,7 +184,7 @@ const HammerApp = {
             }
         };
 
-        // Run for all 3 (Removed card footer IDs from arguments)
+        // Run for all 3
         processSection('infantry', 'unit_infantry', 'lvl_barracks', 'lvl_gb', 'snap_inf', infHelm, 'lbl_inf_g', 'proj_inf');
         processSection('cavalry', 'unit_cavalry', 'lvl_stable', 'lvl_gs', 'snap_cav', cavHelm, 'lbl_cav_g', 'proj_cav');
         processSection('siege', 'unit_siege', 'lvl_workshop', null, 'snap_siege', 0, 'lbl_siege_g', 'proj_siege');
@@ -212,18 +198,18 @@ const HammerApp = {
         document.getElementById('global_def_inf').innerText = this.formatPoints(globalDefInf);
         document.getElementById('global_def_cav').innerText = this.formatPoints(globalDefCav);
         document.getElementById('global_upkeep').innerText = globalUpkeep.toLocaleString();
-        
-        document.getElementById('growth_wood').innerText = this.formatNumber(gWood);
-        document.getElementById('growth_clay').innerText = this.formatNumber(gClay);
-        document.getElementById('growth_iron').innerText = this.formatNumber(gIron);
-        document.getElementById('growth_crop').innerText = this.formatNumber(gCrop);
         document.getElementById('global_growth_cost').innerText = this.formatNumber(globalGrowthCost);
 
+        // Hammer Age
         const ageDays = Math.floor(maxBuildTimeSec / 86400);
         const ageHours = Math.floor((maxBuildTimeSec % 86400) / 3600);
         document.getElementById('hammer_age').innerText = `${ageDays}d ${ageHours}h`;
 
-        const requiredDefPoints = globalOff / 1.49;
+        // Anvil Size (Safe Approach)
+        // No Wall Bonus (1.0)
+        // 50 Def points per Crop
+        // Safety Margin = +15%
+        const requiredDefPoints = globalOff / 1.0; 
         const anvilCrop = (requiredDefPoints / 50) * 1.15;
         document.getElementById('anvil_crop').innerText = Math.round(anvilCrop).toLocaleString();
     },
