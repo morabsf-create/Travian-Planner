@@ -86,13 +86,15 @@ const TroopApp = {
 
         // Calc Queue
         const calcLine = (unitName, lvl, isGreat, helmetPercent) => {
+            // STRICT LIMIT: Max level 20
             if(!unitName || lvl <= 0) return { count: 0, w:0, c:0, i:0, cr:0, cu:0, off:0, def:0 };
             
             const unit = this.getUnitStats(tribe, unitName);
             if(!unit) return { count: 0, w:0, c:0, i:0, cr:0, cu:0, off:0, def:0 };
 
             const reductionFactor = (1 - (helmetPercent/100)) * (1 - allyBonus);
-            const buildFactor = SPEED_FACTORS[lvl] || 1.0;
+            const safeLvl = Math.min(Math.max(lvl, 0), 20); // Force 0-20
+            const buildFactor = SPEED_FACTORS[safeLvl] || 1.0;
 
             let timePerUnit = (unit.time / speed) * buildFactor * artifact * reductionFactor;
             if(timePerUnit < 1) timePerUnit = 1;
@@ -182,7 +184,7 @@ const TroopApp = {
         
         if (durationHours > 0) {
             const costPerHour = totalCost / durationHours;
-            const singleVillageProd = 8400 * speed; // Using the corrected 8400 figure
+            const singleVillageProd = 8400 * speed; // Using 8400 base
             const villagesNeeded = costPerHour / singleVillageProd;
             
             // If the cost is 0, show 0. Otherwise format nicely.
