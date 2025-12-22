@@ -97,12 +97,13 @@ const HammerApp = {
         const tTarget = new Date(document.getElementById('time_target').value);
         
         let diffMs = tTarget - tSnap;
-        if(diffMs < 0) diffMs = 0; // Cannot predict backwards
+        if(diffMs < 0) diffMs = 0; 
         
         const durationSec = diffMs / 1000;
-        const hours = Math.floor(durationSec / 3600);
-        const mins = Math.floor((durationSec % 3600) / 60);
-        document.getElementById('disp_elapsed').innerText = `${hours}h ${mins}m`;
+        const days = Math.floor(durationSec / 86400);
+        const hours = Math.floor((durationSec % 86400) / 3600);
+        // Display Days + Hours, Drop Minutes
+        document.getElementById('disp_elapsed').innerText = `${days}d ${hours}h`;
 
         // --- SETTINGS ---
         const tribe = document.getElementById('tribeSelect').value;
@@ -114,14 +115,17 @@ const HammerApp = {
 
         let globalOff = 0;
         let globalDef = 0;
+        let globalUpkeep = 0;
         let globalGrowthCost = 0;
+        
+        let gWood = 0, gClay = 0, gIron = 0, gCrop = 0;
 
         // --- CORE CALC LOGIC ---
         const processSection = (uId, lvlId, lvlGId, snapId, helm, outputTotalId, outputLabelId, projId) => {
             const unitName = document.getElementById(uId).value;
             const snapshot = parseInt(document.getElementById(snapId).value) || 0;
             const lvl = parseInt(document.getElementById(lvlId).value) || 0;
-            const lvlG = lvlGId ? (parseInt(document.getElementById(lvlGId).value) || 0) : 0; // Siege has no Great
+            const lvlG = lvlGId ? (parseInt(document.getElementById(lvlGId).value) || 0) : 0; 
 
             // Set Label
             document.getElementById(outputLabelId).innerText = unitName ? unitName : "Units";
@@ -138,11 +142,11 @@ const HammerApp = {
             // Calc Production Rate (Units per Second)
             const getRate = (level) => {
                 if(level <= 0) return 0;
-                const safeLvl = Math.min(Math.max(level, 0), 20);
-                const buildFactor = SPEED_FACTORS[safeLvl] || 1.0;
+                // Since using dropdowns, level is safe, but strict check is good
+                const buildFactor = SPEED_FACTORS[level] || 1.0;
                 let timePerUnit = (unit.time / speed) * buildFactor * artifact * reductionFactor;
                 if(timePerUnit < 1) timePerUnit = 1;
-                return 1 / timePerUnit; // Units per second
+                return 1 / timePerUnit; 
             };
 
             const rateStd = getRate(lvl);
@@ -159,26 +163,45 @@ const HammerApp = {
             const grandTotal = snapshot + totalNew;
             document.getElementById(outputTotalId).innerText = grandTotal.toLocaleString();
 
-            // Global Stats Accumulation
+            // Stats
             globalOff += grandTotal * unit.attack;
-            globalDef += grandTotal * (unit.def_inf + unit.def_cav); // Averaged or sum? usually Sum in simple calc
+            globalDef += grandTotal * (unit.def_inf + unit.def_cav); 
+            globalUpkeep += grandTotal * unit.cu;
 
-            // Cost Calculation (Only for the NEW troops)
-            const singleCost = unit.wood + unit.clay + unit.iron + unit.crop;
-            const costStd = producedStd * singleCost;
-            const costGr = producedGr * (singleCost * 3); // Great is 3x
-            globalGrowthCost += (costStd + costGr);
+            // Cost Calculation (Only for NEW troops)
+            // Std
+            const wStd = producedStd * unit.wood;
+            const cStd = producedStd * unit.clay;
+            const iStd = producedStd * unit.iron;
+            const crStd = producedStd * unit.crop;
+            
+            // Great (3x)
+            const wGr = producedGr * unit.wood * 3;
+            const cGr = producedGr * unit.clay * 3;
+            const iGr = producedGr * unit.iron * 3;
+            const crGr = producedGr * unit.crop * 3;
+
+            gWood += (wStd + wGr);
+            gClay += (cStd + cGr);
+            gIron += (iStd + iGr);
+            gCrop += (crStd + crGr);
+            globalGrowthCost += (wStd + wGr + cStd + cGr + iStd + iGr + crStd + crGr);
         };
 
         // Run for all 3
         processSection('unit_infantry', 'lvl_barracks', 'lvl_gb', 'snap_inf', infHelm, 'total_inf', 'lbl_inf', 'proj_inf');
         processSection('unit_cavalry', 'lvl_stable', 'lvl_gs', 'snap_cav', cavHelm, 'total_cav', 'lbl_cav', 'proj_cav');
-        // Siege (no helmet, no Great)
         processSection('unit_siege', 'lvl_workshop', null, 'snap_siege', 0, 'total_siege', 'lbl_siege', 'proj_siege');
 
         // Update Globals
         document.getElementById('global_off').innerText = this.formatNumber(globalOff);
         document.getElementById('global_def').innerText = this.formatNumber(globalDef);
+        document.getElementById('global_upkeep').innerText = globalUpkeep.toLocaleString();
+        
+        document.getElementById('growth_wood').innerText = this.formatNumber(gWood);
+        document.getElementById('growth_clay').innerText = this.formatNumber(gClay);
+        document.getElementById('growth_iron').innerText = this.formatNumber(gIron);
+        document.getElementById('growth_crop').innerText = this.formatNumber(gCrop);
         document.getElementById('global_growth_cost').innerText = this.formatNumber(globalGrowthCost);
     },
 
