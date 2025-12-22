@@ -300,14 +300,18 @@
     <div class="results-box">
         <div class="summary-group">
             <div class="group-title">Projected Army Strength</div>
-            <div class="tiles-grid" style="grid-template-columns: repeat(3, 1fr);">
+            <div class="tiles-grid" style="grid-template-columns: repeat(4, 1fr);">
                 <div class="stat-tile">
                     <span class="tile-label">TOTAL OFFENSE</span>
-                    <span class="tile-val c-off" id="global_off">0</span>
+                    <span class="tile-val c-off" id="global_off">0k</span>
                 </div>
                 <div class="stat-tile">
-                    <span class="tile-label">TOTAL DEFENSE</span>
-                    <span class="tile-val c-def" id="global_def">0</span>
+                    <span class="tile-label">DEF VS INF.</span>
+                    <span class="tile-val c-def" id="global_def_inf">0k</span>
+                </div>
+                <div class="stat-tile">
+                    <span class="tile-label">DEF VS CAV.</span>
+                    <span class="tile-val c-def" id="global_def_cav">0k</span>
                 </div>
                 <div class="stat-tile">
                     <span class="tile-label">TOTAL UPKEEP</span>
@@ -336,10 +340,14 @@
                     <span class="tile-val c-crop" id="growth_crop">0</span>
                 </div>
             </div>
-            <div class="tiles-grid" style="margin-top:10px;">
-                <div class="stat-tile" style="grid-column: span 2;">
+            <div class="tiles-grid" style="margin-top:10px; grid-template-columns: 1fr 1fr;">
+                <div class="stat-tile">
                     <span class="tile-label">TOTAL RESOURCES SPENT</span>
                     <span class="tile-val" id="global_growth_cost">0</span>
+                </div>
+                <div class="stat-tile">
+                    <span class="tile-label">TIME SPAN</span>
+                    <span class="tile-val" style="color:#eee;" id="footer_time_span">0d 0h</span>
                 </div>
             </div>
         </div>

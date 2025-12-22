@@ -38,13 +38,12 @@
         .unit-select { flex: 2; padding: 10px; font-size: 1rem; border: 1px solid #ccc; border-radius: 4px; font-weight: bold; }
         .helmet-select { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-weight: bold; color: #555; }
 
-        /* Inputs */
         .input-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px dashed #eee; }
         .input-row:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
         .input-row label { font-size: 0.9rem; font-weight: bold; color: #555; }
         .input-row select { width: 70px; padding: 6px; text-align: center; border: 1px solid #ccc; border-radius: 4px; font-weight: bold; }
 
-        /* --- CARD FOOTER (TILES) --- */
+        /* --- CARD FOOTER --- */
         .card-footer { background-color: #fafafa; border-top: 1px solid #eee; padding: 15px; }
         .footer-tiles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin-top: 10px; }
         
@@ -77,27 +76,20 @@
         .tile-val { font-size: 1.1rem; font-weight: bold; font-family: 'Roboto', sans-serif; }
         .tile-sub { font-size: 0.75rem; color: #888; margin-top: 3px; }
         
-        /* Colors */
         .c-wood { color: #a5d6a7; }
         .c-clay { color: #ffcc80; }
         .c-iron { color: #b0bec5; }
         .c-crop { color: #fff59d; }
         .c-off { color: #ffab91; }
         .c-def { color: #90caf9; }
-        .c-upkeep { color: #fdd835 !important; } /* Bright Yellow */
+        .c-upkeep { color: #fdd835 !important; }
 
-        /* Resource Grid - 4 cols on desktop, 2 on mobile */
-        .res-breakdown-grid { 
-            display: grid; 
-            grid-template-columns: repeat(4, 1fr); 
-            gap: 10px; 
-        }
+        .res-breakdown-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
 
         @media (max-width: 600px) {
             .training-grid { grid-template-columns: 1fr; }
             .card-top-row { flex-direction: column; gap: 10px; }
             .helmet-select, .unit-select { width: 100%; }
-            /* Mobile response: 2 cols for resources and footer tiles */
             .res-breakdown-grid { grid-template-columns: 1fr 1fr; } 
             .footer-tiles { grid-template-columns: 1fr 1fr; }
             .tiles-grid { grid-template-columns: 1fr 1fr; }
@@ -288,7 +280,7 @@
         
         <div class="summary-group">
             <div class="group-title">Army Strength & Power</div>
-            <div class="tiles-grid">
+            <div class="tiles-grid" style="grid-template-columns: repeat(4, 1fr);">
                 <div class="stat-tile">
                     <span class="tile-label" id="lbl_inf">INFANTRY</span>
                     <span class="tile-val" id="global_inf">0</span>
@@ -303,11 +295,17 @@
                 </div>
                 <div class="stat-tile">
                     <span class="tile-label">OFFENSE</span>
-                    <span class="tile-val c-off" id="global_off">0</span>
+                    <span class="tile-val c-off" id="global_off">0k</span>
+                </div>
+            </div>
+            <div class="tiles-grid" style="margin-top:10px; grid-template-columns: 1fr 1fr;">
+                <div class="stat-tile">
+                    <span class="tile-label">DEF VS INF.</span>
+                    <span class="tile-val c-def" id="global_def_inf">0k</span>
                 </div>
                 <div class="stat-tile">
-                    <span class="tile-label">DEFENSE</span>
-                    <span class="tile-val c-def" id="global_def">0</span>
+                    <span class="tile-label">DEF VS CAV.</span>
+                    <span class="tile-val c-def" id="global_def_cav">0k</span>
                 </div>
             </div>
         </div>

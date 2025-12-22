@@ -27,11 +27,9 @@ const HammerApp = {
         this.populateLevelSelect('lvl_workshop', 20);
 
         // 3. Init Date Pickers
-        // Default Snapshot: Yesterday same time
         const now = new Date();
         const yesterday = new Date(now.getTime() - (24 * 60 * 60 * 1000));
         
-        // Format for datetime-local: YYYY-MM-DDTHH:MM
         const toLocalISO = (date) => {
             const pad = (n) => n < 10 ? '0'+n : n;
             return date.getFullYear() + '-' + 
@@ -102,8 +100,10 @@ const HammerApp = {
         const durationSec = diffMs / 1000;
         const days = Math.floor(durationSec / 86400);
         const hours = Math.floor((durationSec % 86400) / 3600);
-        // Display Days + Hours, Drop Minutes
-        document.getElementById('disp_elapsed').innerText = `${days}d ${hours}h`;
+        const timeString = `${days}d ${hours}h`;
+        
+        document.getElementById('disp_elapsed').innerText = timeString;
+        document.getElementById('footer_time_span').innerText = timeString;
 
         // --- SETTINGS ---
         const tribe = document.getElementById('tribeSelect').value;
@@ -114,7 +114,8 @@ const HammerApp = {
         const cavHelm = parseFloat(document.getElementById('cav_helmet').value) || 0;
 
         let globalOff = 0;
-        let globalDef = 0;
+        let globalDefInf = 0;
+        let globalDefCav = 0;
         let globalUpkeep = 0;
         let globalGrowthCost = 0;
         
@@ -127,7 +128,6 @@ const HammerApp = {
             const lvl = parseInt(document.getElementById(lvlId).value) || 0;
             const lvlG = lvlGId ? (parseInt(document.getElementById(lvlGId).value) || 0) : 0; 
 
-            // Set Label
             document.getElementById(outputLabelId).innerText = unitName ? unitName : "Units";
 
             if(!unitName) {
@@ -139,10 +139,8 @@ const HammerApp = {
             const unit = this.getUnitStats(tribe, unitName);
             const reductionFactor = (1 - (helm/100)) * (1 - allyBonus);
 
-            // Calc Production Rate (Units per Second)
             const getRate = (level) => {
                 if(level <= 0) return 0;
-                // Since using dropdowns, level is safe, but strict check is good
                 const buildFactor = SPEED_FACTORS[level] || 1.0;
                 let timePerUnit = (unit.time / speed) * buildFactor * artifact * reductionFactor;
                 if(timePerUnit < 1) timePerUnit = 1;
@@ -152,12 +150,10 @@ const HammerApp = {
             const rateStd = getRate(lvl);
             const rateGr = getRate(lvlG);
             
-            // Total Produced
             const producedStd = Math.floor(rateStd * durationSec);
             const producedGr = Math.floor(rateGr * durationSec);
             const totalNew = producedStd + producedGr;
             
-            // Update UI
             document.getElementById(projId).innerText = "+" + totalNew.toLocaleString();
             
             const grandTotal = snapshot + totalNew;
@@ -165,17 +161,16 @@ const HammerApp = {
 
             // Stats
             globalOff += grandTotal * unit.attack;
-            globalDef += grandTotal * (unit.def_inf + unit.def_cav); 
+            globalDefInf += grandTotal * unit.def_inf;
+            globalDefCav += grandTotal * unit.def_cav;
             globalUpkeep += grandTotal * unit.cu;
 
-            // Cost Calculation (Only for NEW troops)
-            // Std
+            // Cost Calculation
             const wStd = producedStd * unit.wood;
             const cStd = producedStd * unit.clay;
             const iStd = producedStd * unit.iron;
             const crStd = producedStd * unit.crop;
             
-            // Great (3x)
             const wGr = producedGr * unit.wood * 3;
             const cGr = producedGr * unit.clay * 3;
             const iGr = producedGr * unit.iron * 3;
@@ -188,14 +183,14 @@ const HammerApp = {
             globalGrowthCost += (wStd + wGr + cStd + cGr + iStd + iGr + crStd + crGr);
         };
 
-        // Run for all 3
         processSection('unit_infantry', 'lvl_barracks', 'lvl_gb', 'snap_inf', infHelm, 'total_inf', 'lbl_inf', 'proj_inf');
         processSection('unit_cavalry', 'lvl_stable', 'lvl_gs', 'snap_cav', cavHelm, 'total_cav', 'lbl_cav', 'proj_cav');
         processSection('unit_siege', 'lvl_workshop', null, 'snap_siege', 0, 'total_siege', 'lbl_siege', 'proj_siege');
 
         // Update Globals
-        document.getElementById('global_off').innerText = this.formatNumber(globalOff);
-        document.getElementById('global_def').innerText = this.formatNumber(globalDef);
+        document.getElementById('global_off').innerText = this.formatPoints(globalOff);
+        document.getElementById('global_def_inf').innerText = this.formatPoints(globalDefInf);
+        document.getElementById('global_def_cav').innerText = this.formatPoints(globalDefCav);
         document.getElementById('global_upkeep').innerText = globalUpkeep.toLocaleString();
         
         document.getElementById('growth_wood').innerText = this.formatNumber(gWood);
@@ -208,6 +203,12 @@ const HammerApp = {
     formatNumber: function(num) {
         if (num >= 1000000) return (num / 1000000).toFixed(2) + 'M';
         if (num >= 1000) return (num / 1000).toFixed(1) + 'k';
+        return num.toLocaleString();
+    },
+
+    formatPoints: function(num) {
+        if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+        if (num >= 1000) return (num / 1000).toFixed(0) + 'k';
         return num.toLocaleString();
     }
 };

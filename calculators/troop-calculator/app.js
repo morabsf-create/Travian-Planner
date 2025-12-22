@@ -20,7 +20,6 @@ const TroopApp = {
         });
 
         // 2. Populate Level Dropdowns (0-20)
-        // Standard Defaults to 20, Great Defaults to 0
         this.populateLevelSelect('lvl_barracks', 20);
         this.populateLevelSelect('lvl_gb', 0);
         this.populateLevelSelect('lvl_stable', 20);
@@ -84,23 +83,20 @@ const TroopApp = {
         const helmetInf = parseFloat(document.getElementById('inf_helmet').value) || 0;
         const helmetCav = parseFloat(document.getElementById('cav_helmet').value) || 0;
 
-        // Calc Queue
         const calcLine = (unitName, lvl, isGreat, helmetPercent) => {
-            // STRICT LIMIT: Max level 20
-            if(!unitName || lvl <= 0) return { count: 0, w:0, c:0, i:0, cr:0, cu:0, off:0, def:0 };
+            if(!unitName || lvl <= 0) return { count: 0, w:0, c:0, i:0, cr:0, cu:0, off:0, defInf:0, defCav:0 };
             
             const unit = this.getUnitStats(tribe, unitName);
-            if(!unit) return { count: 0, w:0, c:0, i:0, cr:0, cu:0, off:0, def:0 };
+            if(!unit) return { count: 0, w:0, c:0, i:0, cr:0, cu:0, off:0, defInf:0, defCav:0 };
 
             const reductionFactor = (1 - (helmetPercent/100)) * (1 - allyBonus);
-            const safeLvl = Math.min(Math.max(lvl, 0), 20); // Force 0-20
-            const buildFactor = SPEED_FACTORS[safeLvl] || 1.0;
+            const buildFactor = SPEED_FACTORS[lvl] || 1.0;
 
             let timePerUnit = (unit.time / speed) * buildFactor * artifact * reductionFactor;
             if(timePerUnit < 1) timePerUnit = 1;
 
             const quantity = Math.floor(durationSec / timePerUnit);
-            if(quantity <= 0) return { count: 0, w:0, c:0, i:0, cr:0, cu:0, off:0, def:0 };
+            if(quantity <= 0) return { count: 0, w:0, c:0, i:0, cr:0, cu:0, off:0, defInf:0, defCav:0 };
 
             const costMult = isGreat ? 3 : 1;
             return {
@@ -111,7 +107,8 @@ const TroopApp = {
                 cr: unit.crop * costMult * quantity,
                 cu: unit.cu * quantity,
                 off: unit.attack * quantity,
-                def: (unit.def_inf + unit.def_cav) * quantity
+                defInf: unit.def_inf * quantity,
+                defCav: unit.def_cav * quantity
             };
         };
 
@@ -127,7 +124,6 @@ const TroopApp = {
         document.getElementById('inf_clay').innerText = this.formatNumber(infStats.c);
         document.getElementById('inf_iron').innerText = this.formatNumber(infStats.i);
         document.getElementById('inf_crop').innerText = this.formatNumber(infStats.cr);
-        
         document.getElementById('lbl_inf').innerText = infUnitName ? infUnitName.toUpperCase() : "INFANTRY";
 
         // --- CAVALRY ---
@@ -142,7 +138,6 @@ const TroopApp = {
         document.getElementById('cav_clay').innerText = this.formatNumber(cavStats.c);
         document.getElementById('cav_iron').innerText = this.formatNumber(cavStats.i);
         document.getElementById('cav_crop').innerText = this.formatNumber(cavStats.cr);
-
         document.getElementById('lbl_cav').innerText = cavUnitName ? cavUnitName.toUpperCase() : "CAVALRY";
 
         // --- SIEGE ---
@@ -155,7 +150,6 @@ const TroopApp = {
         document.getElementById('siege_clay').innerText = this.formatNumber(siegeStd.c);
         document.getElementById('siege_iron').innerText = this.formatNumber(siegeStd.i);
         document.getElementById('siege_crop').innerText = this.formatNumber(siegeStd.cr);
-
         document.getElementById('lbl_siege').innerText = siegeUnitName ? siegeUnitName.toUpperCase() : "SIEGE";
 
         // --- GLOBAL ---
@@ -174,20 +168,16 @@ const TroopApp = {
         document.getElementById('gc_crop').innerText = this.formatNumber(globalStats.cr);
 
         document.getElementById('global_upkeep').innerText = globalStats.cu.toLocaleString();
-        document.getElementById('global_off').innerText = globalStats.off.toLocaleString();
-        document.getElementById('global_def').innerText = globalStats.def.toLocaleString();
+        document.getElementById('global_off').innerText = this.formatPoints(globalStats.off);
+        document.getElementById('global_def_inf').innerText = this.formatPoints(globalStats.defInf);
+        document.getElementById('global_def_cav').innerText = this.formatPoints(globalStats.defCav);
 
         // --- PUSH VILLAGE CALC ---
-        // Definition: 4-4-4-6 L10 fields + all factories + Mill/Bakery + Plus
-        // Standard production 1x = 8400 total res/hr
-        // We scale this by server speed.
-        
         if (durationHours > 0) {
             const costPerHour = totalCost / durationHours;
-            const singleVillageProd = 8400 * speed; // Using 8400 base
+            const singleVillageProd = 8400 * speed;
             const villagesNeeded = costPerHour / singleVillageProd;
             
-            // If the cost is 0, show 0. Otherwise format nicely.
             if(totalCost > 0) {
                 document.getElementById('global_push_villages').innerText = villagesNeeded.toFixed(2);
             } else {
@@ -208,14 +198,21 @@ const TroopApp = {
                 cr: acc.cr + curr.cr,
                 cu: acc.cu + curr.cu,
                 off: acc.off + curr.off,
-                def: acc.def + curr.def
+                defInf: acc.defInf + curr.defInf,
+                defCav: acc.defCav + curr.defCav
             };
-        }, { count: 0, w:0, c:0, i:0, cr:0, cu:0, off:0, def:0 });
+        }, { count: 0, w:0, c:0, i:0, cr:0, cu:0, off:0, defInf:0, defCav:0 });
     },
 
     formatNumber: function(num) {
         if (num >= 1000000) return (num / 1000000).toFixed(2) + 'M';
         if (num >= 1000) return (num / 1000).toFixed(1) + 'k';
+        return num.toLocaleString();
+    },
+
+    formatPoints: function(num) {
+        if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+        if (num >= 1000) return (num / 1000).toFixed(0) + 'k';
         return num.toLocaleString();
     }
 };
