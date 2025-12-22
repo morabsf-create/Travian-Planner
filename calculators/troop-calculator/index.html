@@ -8,48 +8,62 @@
     <link rel="stylesheet" href="../../css/style.css">
     <style>
         .calc-wrapper { max-width: 1200px; margin: 0 auto; }
+        
+        /* Settings Bar */
         .settings-bar { 
             background: #fff; padding: 20px; border-radius: 8px; border: 1px solid #c9b7a2; 
-            margin-bottom: 25px; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px;
+            margin-bottom: 25px; display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 15px;
         }
-        
-        .training-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-bottom: 25px; }
-        .train-card { background: #fff; border: 1px solid #c9b7a2; border-radius: 8px; overflow: hidden; }
-        .card-header { 
-            padding: 12px 15px; font-family: 'Vollkorn', serif; font-weight: bold; font-size: 1.1rem; 
-            border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;
-        }
-        .header-inf { background-color: #e8f5e9; color: #2e7d32; }
-        .header-cav { background-color: #fff3e0; color: #ef6c00; }
-        .header-sie { background-color: #f3e5f5; color: #7b1fa2; }
-        
-        .card-body { padding: 20px; }
-        .input-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
-        .input-row label { font-size: 0.9rem; color: #555; font-weight: bold; }
-        .input-row input, .input-row select { padding: 6px; border: 1px solid #ccc; border-radius: 4px; width: 80px; }
-        .input-row select.unit-select { width: 100%; margin-bottom: 15px; padding: 8px; font-weight: bold; }
+        .settings-bar label { display: block; font-size: 0.75rem; font-weight: bold; color: #777; margin-bottom: 4px; text-transform: uppercase; }
+        .settings-bar select, .settings-bar input { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-weight: bold; color: #333; box-sizing: border-box; }
 
-        .sub-section { margin-top: 15px; padding-top: 15px; border-top: 1px dashed #ddd; }
-        .sub-label { display: block; font-size: 0.8rem; text-transform: uppercase; color: #999; margin-bottom: 8px; font-weight: bold; }
+        /* Training Cards Grid */
+        .training-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 20px; margin-bottom: 40px; }
+        
+        .train-card { background: #fff; border: 1px solid #c9b7a2; border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; }
+        .card-header { padding: 12px 15px; font-family: 'Vollkorn', serif; font-weight: bold; font-size: 1.1rem; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+        .header-inf { background-color: #e8f5e9; color: #2e7d32; border-bottom-color: #c8e6c9; }
+        .header-cav { background-color: #fff3e0; color: #ef6c00; border-bottom-color: #ffe0b2; }
+        .header-sie { background-color: #f3e5f5; color: #7b1fa2; border-bottom-color: #e1bee7; }
 
+        .card-body { padding: 20px; flex: 1; }
+        .unit-select { width: 100%; padding: 10px; font-size: 1rem; margin-bottom: 20px; border: 1px solid #ccc; border-radius: 4px; font-weight: bold; }
+
+        /* Input Rows inside Card */
+        .input-group { margin-bottom: 15px; border-bottom: 1px dashed #eee; padding-bottom: 15px; }
+        .input-group:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+        
+        .input-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .input-row label { font-size: 0.9rem; font-weight: bold; color: #555; }
+        .input-row input { width: 60px; padding: 5px; text-align: center; border: 1px solid #ccc; border-radius: 4px; }
+        
+        .output-row { display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; color: #666; background: #f9f9f9; padding: 6px 10px; border-radius: 4px; }
+        .output-val { font-weight: bold; color: #333; }
+        
+        /* Card Footer (Summary) */
+        .card-footer { background-color: #fafafa; border-top: 1px solid #eee; padding: 15px; font-size: 0.9rem; }
+        .footer-title { font-size: 0.75rem; text-transform: uppercase; color: #999; font-weight: bold; margin-bottom: 8px; letter-spacing: 1px; }
+        
+        .summary-stats { display: flex; justify-content: space-between; margin-bottom: 12px; font-weight: bold; color: #333; }
+        .stat-item span { display: block; font-size: 0.75rem; color: #777; font-weight: normal; }
+        
+        .cost-grid { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 5px; font-size: 0.85rem; color: #555; background: #fff; padding: 8px; border: 1px solid #eee; border-radius: 4px; }
+        .cost-item { display: flex; flex-direction: column; align-items: center; }
+        .cost-item small { font-size: 0.7rem; color: #999; margin-bottom: 2px; }
+
+        /* Global Results Footer */
         .results-box { 
             background: #333; color: #fff; padding: 25px; border-radius: 8px; 
             display: grid; grid-template-columns: 1fr; gap: 20px;
         }
         
-        /* Stats Grid */
-        .res-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 20px; margin-bottom: 20px; border-bottom: 1px solid #555; padding-bottom: 20px; }
-        .res-stat h4 { margin: 0 0 5px 0; color: #aaa; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; }
-        .res-stat .val { font-size: 1.5rem; font-weight: bold; font-family: 'Roboto', sans-serif; }
-        .res-stat .sub { font-size: 0.85rem; color: #ccc; margin-top: 2px; }
+        .global-stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 20px; border-bottom: 1px solid #555; padding-bottom: 20px; }
+        .g-stat h4 { margin: 0 0 8px 0; color: #aaa; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; }
+        .g-val { font-size: 1.2rem; font-weight: bold; font-family: 'Roboto', sans-serif; display: flex; align-items: center; gap: 8px; }
+        .g-sub { font-size: 0.9rem; color: #ccc; margin-top: 4px; }
 
-        /* Breakdowns */
-        .breakdown-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
-        .bd-col h4 { color: #859f51; font-size: 0.9rem; margin-top: 0; margin-bottom: 10px; border-bottom: 1px solid #555; padding-bottom: 5px;}
-        .bd-row { display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 6px; color: #ddd; }
-        .bd-row span:last-child { font-weight: bold; color: #fff; }
-        
-        .res-icon { width: 16px; height: 16px; margin-right: 5px; vertical-align: middle; filter: grayscale(100%); opacity: 0.7; }
+        .breakdown-row { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 0.95rem; }
+        .breakdown-row span:last-child { font-weight: bold; color: #859f51; }
 
     </style>
 </head>
@@ -64,12 +78,12 @@
     
     <div class="settings-bar">
         <div>
-            <label style="display:block; font-size:0.8rem; font-weight:bold; color:#777; margin-bottom:4px;">TRIBE</label>
-            <select id="tribeSelect" style="width:100%; padding:8px; font-weight:bold;" onchange="TroopApp.updateUnitDropdowns()"></select>
+            <label>TRIBE</label>
+            <select id="tribeSelect" onchange="TroopApp.updateUnitDropdowns()"></select>
         </div>
         <div>
-            <label style="display:block; font-size:0.8rem; font-weight:bold; color:#777; margin-bottom:4px;">SERVER SPEED</label>
-            <select id="serverSpeed" style="width:100%; padding:8px;" onchange="TroopApp.calculate()">
+            <label>SERVER SPEED</label>
+            <select id="serverSpeed" onchange="TroopApp.calculate()">
                 <option value="1">1x</option>
                 <option value="2">2x</option>
                 <option value="3">3x</option>
@@ -78,12 +92,12 @@
             </select>
         </div>
         <div>
-            <label style="display:block; font-size:0.8rem; font-weight:bold; color:#777; margin-bottom:4px;">DURATION (HOURS)</label>
-            <input type="number" id="duration" value="24" min="1" style="width:100%; padding:8px; box-sizing:border-box;" oninput="TroopApp.calculate()">
+            <label>DURATION (HOURS)</label>
+            <input type="number" id="duration" value="24" min="1" oninput="TroopApp.calculate()">
         </div>
         <div>
-            <label style="display:block; font-size:0.8rem; font-weight:bold; color:#777; margin-bottom:4px;">HELMET BONUS</label>
-            <select id="helmet" style="width:100%; padding:8px;" onchange="TroopApp.calculate()">
+            <label>HELMET BONUS</label>
+            <select id="helmet" onchange="TroopApp.calculate()">
                 <option value="0">0%</option>
                 <option value="10">10%</option>
                 <option value="15">15%</option>
@@ -91,16 +105,16 @@
             </select>
         </div>
         <div>
-            <label style="display:block; font-size:0.8rem; font-weight:bold; color:#777; margin-bottom:4px;">ARTIFACT</label>
-            <select id="artifact" style="width:100%; padding:8px;" onchange="TroopApp.calculate()">
+            <label>ARTIFACT</label>
+            <select id="artifact" onchange="TroopApp.calculate()">
                 <option value="1.0">None (100% Time)</option>
                 <option value="0.75">Small (75% Time)</option>
                 <option value="0.5">Unique (50% Time)</option>
             </select>
         </div>
         <div>
-            <label style="display:block; font-size:0.8rem; font-weight:bold; color:#777; margin-bottom:4px;">ALLIANCE BONUS</label>
-            <select id="allyBonus" style="width:100%; padding:8px;" onchange="TroopApp.calculate()">
+            <label>ALLIANCE BONUS</label>
+            <select id="allyBonus" onchange="TroopApp.calculate()">
                 <option value="0">0%</option>
                 <option value="0.02">2%</option>
                 <option value="0.04">4%</option>
@@ -112,6 +126,7 @@
     </div>
 
     <div class="training-grid">
+        
         <div class="train-card">
             <div class="card-header header-inf">
                 <span>⚔️ Infantry</span>
@@ -119,16 +134,40 @@
             </div>
             <div class="card-body">
                 <select id="unit_infantry" class="unit-select" onchange="TroopApp.calculate()"></select>
-                <div class="input-row">
-                    <label>Barracks Level</label>
-                    <input type="number" id="lvl_barracks" value="20" min="0" max="20" oninput="TroopApp.calculate()">
-                </div>
-                <div class="sub-section">
-                    <span class="sub-label">Great Barracks (3x Cost)</span>
+                
+                <div class="input-group">
                     <div class="input-row">
-                        <label>Level (0 = Off)</label>
+                        <label>Standard Barracks</label>
+                        <input type="number" id="lvl_barracks" value="20" min="0" max="20" oninput="TroopApp.calculate()">
+                    </div>
+                    <div class="output-row">
+                        <span>👉 Output</span>
+                        <span class="output-val" id="out_inf_std">0</span>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <div class="input-row">
+                        <label>Great Barracks (3x)</label>
                         <input type="number" id="lvl_gb" value="0" min="0" max="20" oninput="TroopApp.calculate()">
                     </div>
+                    <div class="output-row">
+                        <span>👉 Output</span>
+                        <span class="output-val" id="out_inf_gb">0</span>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer">
+                <div class="footer-title">Infantry Summary</div>
+                <div class="summary-stats">
+                    <div class="stat-item">Total: <span id="inf_total_units">0</span></div>
+                    <div class="stat-item">Upkeep: <span id="inf_upkeep">0</span>/hr</div>
+                </div>
+                <div class="cost-grid">
+                    <div class="cost-item"><small>🌲 Wood</small><span id="inf_wood">0</span></div>
+                    <div class="cost-item"><small>🧱 Clay</small><span id="inf_clay">0</span></div>
+                    <div class="cost-item"><small>⚒️ Iron</small><span id="inf_iron">0</span></div>
+                    <div class="cost-item"><small>🌾 Crop</small><span id="inf_crop">0</span></div>
                 </div>
             </div>
         </div>
@@ -140,16 +179,40 @@
             </div>
             <div class="card-body">
                 <select id="unit_cavalry" class="unit-select" onchange="TroopApp.calculate()"></select>
-                <div class="input-row">
-                    <label>Stable Level</label>
-                    <input type="number" id="lvl_stable" value="20" min="0" max="20" oninput="TroopApp.calculate()">
-                </div>
-                <div class="sub-section">
-                    <span class="sub-label">Great Stable (3x Cost)</span>
+                
+                <div class="input-group">
                     <div class="input-row">
-                        <label>Level (0 = Off)</label>
+                        <label>Standard Stable</label>
+                        <input type="number" id="lvl_stable" value="20" min="0" max="20" oninput="TroopApp.calculate()">
+                    </div>
+                    <div class="output-row">
+                        <span>👉 Output</span>
+                        <span class="output-val" id="out_cav_std">0</span>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <div class="input-row">
+                        <label>Great Stable (3x)</label>
                         <input type="number" id="lvl_gs" value="0" min="0" max="20" oninput="TroopApp.calculate()">
                     </div>
+                    <div class="output-row">
+                        <span>👉 Output</span>
+                        <span class="output-val" id="out_cav_gs">0</span>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer">
+                <div class="footer-title">Cavalry Summary</div>
+                <div class="summary-stats">
+                    <div class="stat-item">Total: <span id="cav_total_units">0</span></div>
+                    <div class="stat-item">Upkeep: <span id="cav_upkeep">0</span>/hr</div>
+                </div>
+                <div class="cost-grid">
+                    <div class="cost-item"><small>🌲 Wood</small><span id="cav_wood">0</span></div>
+                    <div class="cost-item"><small>🧱 Clay</small><span id="cav_clay">0</span></div>
+                    <div class="cost-item"><small>⚒️ Iron</small><span id="cav_iron">0</span></div>
+                    <div class="cost-item"><small>🌾 Crop</small><span id="cav_crop">0</span></div>
                 </div>
             </div>
         </div>
@@ -161,51 +224,61 @@
             </div>
             <div class="card-body">
                 <select id="unit_siege" class="unit-select" onchange="TroopApp.calculate()"></select>
-                <div class="input-row">
-                    <label>Workshop Level</label>
-                    <input type="number" id="lvl_workshop" value="20" min="0" max="20" oninput="TroopApp.calculate()">
+                
+                <div class="input-group">
+                    <div class="input-row">
+                        <label>Workshop</label>
+                        <input type="number" id="lvl_workshop" value="20" min="0" max="20" oninput="TroopApp.calculate()">
+                    </div>
+                    <div class="output-row">
+                        <span>👉 Output</span>
+                        <span class="output-val" id="out_siege_std">0</span>
+                    </div>
+                </div>
+                <div style="height: 104px;"></div>
+            </div>
+            <div class="card-footer">
+                <div class="footer-title">Siege Summary</div>
+                <div class="summary-stats">
+                    <div class="stat-item">Total: <span id="siege_total_units">0</span></div>
+                    <div class="stat-item">Upkeep: <span id="siege_upkeep">0</span>/hr</div>
+                </div>
+                <div class="cost-grid">
+                    <div class="cost-item"><small>🌲 Wood</small><span id="siege_wood">0</span></div>
+                    <div class="cost-item"><small>🧱 Clay</small><span id="siege_clay">0</span></div>
+                    <div class="cost-item"><small>⚒️ Iron</small><span id="siege_iron">0</span></div>
+                    <div class="cost-item"><small>🌾 Crop</small><span id="siege_crop">0</span></div>
                 </div>
             </div>
         </div>
     </div>
 
     <div class="results-box">
-        <div class="res-grid">
-            <div class="res-stat">
-                <h4>Total Units</h4>
-                <div class="val" id="res_total_units">0</div>
+        <div class="global-stats-grid">
+            <div class="g-stat">
+                <h4>Troops Produced</h4>
+                <div class="g-val" style="display:block;">
+                    <div class="breakdown-row"><span>⚔️ Infantry:</span> <span id="global_inf">0</span></div>
+                    <div class="breakdown-row"><span>🐎 Cavalry:</span> <span id="global_cav">0</span></div>
+                    <div class="breakdown-row"><span>🏚️ Siege:</span> <span id="global_siege">0</span></div>
+                </div>
             </div>
-            <div class="res-stat">
-                <h4>Total Cost</h4>
-                <div class="val" id="res_total_cost">0</div>
+            <div class="g-stat">
+                <h4>Resource Totals</h4>
+                <div class="g-val" id="global_cost">0</div>
+                <div class="g-sub">Total Cost</div>
             </div>
-            <div class="res-stat">
-                <h4>Crop Upkeep</h4>
-                <div class="val" id="res_upkeep" style="color:#ffcc80;">0</div>
-                <div class="sub">Per Hour</div>
+            <div class="g-stat">
+                <h4>Total Upkeep</h4>
+                <div class="g-val" style="color:#ffcc80;" id="global_upkeep">0</div>
+                <div class="g-sub">Per Hour</div>
             </div>
-            <div class="res-stat">
+            <div class="g-stat">
                 <h4>Combat Power</h4>
-                <div class="sub">⚔️ <span id="res_off">0</span></div>
-                <div class="sub">🛡️ <span id="res_def">0</span></div>
-            </div>
-        </div>
-
-        <div class="breakdown-grid">
-            <div class="bd-col">
-                <h4>Resource Cost Breakdown</h4>
-                <div class="bd-row"><span>🌲 Wood</span><span id="bd_wood">0</span></div>
-                <div class="bd-row"><span>🧱 Clay</span><span id="bd_clay">0</span></div>
-                <div class="bd-row"><span>⚒️ Iron</span><span id="bd_iron">0</span></div>
-                <div class="bd-row"><span>🌾 Crop</span><span id="bd_crop">0</span></div>
-            </div>
-            <div class="bd-col">
-                <h4>Troop Source Breakdown</h4>
-                <div class="bd-row"><span>Barracks</span><span id="bd_barracks">0</span></div>
-                <div class="bd-row"><span>Gr. Barracks</span><span id="bd_gb">0</span></div>
-                <div class="bd-row"><span>Stable</span><span id="bd_stable">0</span></div>
-                <div class="bd-row"><span>Gr. Stable</span><span id="bd_gs">0</span></div>
-                <div class="bd-row"><span>Workshop</span><span id="bd_workshop">0</span></div>
+                <div class="g-val" style="flex-direction:column; align-items:flex-start;">
+                    <div style="font-size:1rem;">⚔️ <span id="global_off">0</span></div>
+                    <div style="font-size:1rem;">🛡️ <span id="global_def">0</span></div>
+                </div>
             </div>
         </div>
     </div>

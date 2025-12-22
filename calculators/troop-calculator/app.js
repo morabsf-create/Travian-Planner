@@ -1,7 +1,6 @@
 /* Project/calculators/troop-calculator/app.js */
 
 const TroopApp = {
-    // Cache for currently selected units to preserve selection across tribe changes if valid
     data: null,
 
     init: function() {
@@ -76,108 +75,118 @@ const TroopApp = {
         // Modifiers
         const reductionFactor = (1 - (helmetPercent/100)) * (1 - allyBonus);
 
-        // Totals
-        let totalUnits = 0;
-        let totalCost = 0;
-        let totalUpkeep = 0;
-        let totalOff = 0;
-        let totalDef = 0;
-
-        // Resource Breakdown
-        let resWood = 0;
-        let resClay = 0;
-        let resIron = 0;
-        let resCrop = 0;
-
-        // Source Breakdown
-        const counts = {
-            barracks: 0,
-            gb: 0,
-            stable: 0,
-            gs: 0,
-            workshop: 0
-        };
-
-        // Helper Calculation Function
-        const calcQueue = (unitName, buildingLvl, isGreat, sourceKey) => {
-            if(!unitName || buildingLvl <= 0) return;
+        // --- Helper to Calc Specific Line ---
+        const calcLine = (unitName, lvl, isGreat) => {
+            if(!unitName || lvl <= 0) return { count: 0, w:0, c:0, i:0, cr:0, cu:0, off:0, def:0 };
             
             const unit = this.getUnitStats(tribe, unitName);
-            if(!unit) return;
+            if(!unit) return { count: 0, w:0, c:0, i:0, cr:0, cu:0, off:0, def:0 };
 
-            // Determine Building Speed Factor
-            const safeLvl = Math.min(Math.max(buildingLvl, 0), 20);
+            const safeLvl = Math.min(Math.max(lvl, 0), 20);
             const buildFactor = SPEED_FACTORS[safeLvl] || 1.0;
 
-            // Calculate Time Per Unit
             let timePerUnit = (unit.time / speed) * buildFactor * artifact * reductionFactor;
             if(timePerUnit < 1) timePerUnit = 1;
 
-            // Calculate Quantity
             const quantity = Math.floor(durationSec / timePerUnit);
-            if(quantity <= 0) return;
+            if(quantity <= 0) return { count: 0, w:0, c:0, i:0, cr:0, cu:0, off:0, def:0 };
 
-            // Update Counts
-            counts[sourceKey] += quantity;
-            totalUnits += quantity;
-            
-            // Stats
-            totalUpkeep += unit.cu * quantity;
-            totalOff += unit.attack * quantity;
-            totalDef += (unit.def_inf + unit.def_cav) * quantity;
-
-            // Costs (3x if Great)
             const costMult = isGreat ? 3 : 1;
-            
-            const w = unit.wood * costMult * quantity;
-            const c = unit.clay * costMult * quantity;
-            const i = unit.iron * costMult * quantity;
-            const cr = unit.crop * costMult * quantity;
-
-            resWood += w;
-            resClay += c;
-            resIron += i;
-            resCrop += cr;
-            totalCost += (w + c + i + cr);
+            return {
+                count: quantity,
+                w: unit.wood * costMult * quantity,
+                c: unit.clay * costMult * quantity,
+                i: unit.iron * costMult * quantity,
+                cr: unit.crop * costMult * quantity,
+                cu: unit.cu * quantity,
+                off: unit.attack * quantity,
+                def: (unit.def_inf + unit.def_cav) * quantity
+            };
         };
 
-        // 2. Process Infantry 
+        // --- INFANTRY ---
         const infUnit = document.getElementById('unit_infantry').value;
-        const lvlBarracks = parseInt(document.getElementById('lvl_barracks').value) || 0;
-        const lvlGB = parseInt(document.getElementById('lvl_gb').value) || 0;
-        calcQueue(infUnit, lvlBarracks, false, 'barracks');
-        calcQueue(infUnit, lvlGB, true, 'gb');
+        const infStd = calcLine(infUnit, parseInt(document.getElementById('lvl_barracks').value)||0, false);
+        const infGb  = calcLine(infUnit, parseInt(document.getElementById('lvl_gb').value)||0, true);
+        
+        // Sum Infantry
+        const infStats = this.sumStats(infStd, infGb);
+        
+        // Update DOM - Infantry
+        document.getElementById('out_inf_std').innerText = infStd.count.toLocaleString();
+        document.getElementById('out_inf_gb').innerText = infGb.count.toLocaleString();
+        
+        document.getElementById('inf_total_units').innerText = infStats.count.toLocaleString();
+        document.getElementById('inf_upkeep').innerText = infStats.cu.toLocaleString();
+        document.getElementById('inf_wood').innerText = this.formatNumber(infStats.w);
+        document.getElementById('inf_clay').innerText = this.formatNumber(infStats.c);
+        document.getElementById('inf_iron').innerText = this.formatNumber(infStats.i);
+        document.getElementById('inf_crop').innerText = this.formatNumber(infStats.cr);
 
-        // 3. Process Cavalry 
+
+        // --- CAVALRY ---
         const cavUnit = document.getElementById('unit_cavalry').value;
-        const lvlStable = parseInt(document.getElementById('lvl_stable').value) || 0;
-        const lvlGS = parseInt(document.getElementById('lvl_gs').value) || 0;
-        calcQueue(cavUnit, lvlStable, false, 'stable');
-        calcQueue(cavUnit, lvlGS, true, 'gs');
+        const cavStd = calcLine(cavUnit, parseInt(document.getElementById('lvl_stable').value)||0, false);
+        const cavGs  = calcLine(cavUnit, parseInt(document.getElementById('lvl_gs').value)||0, true);
+        
+        // Sum Cavalry
+        const cavStats = this.sumStats(cavStd, cavGs);
+        
+        // Update DOM - Cavalry
+        document.getElementById('out_cav_std').innerText = cavStd.count.toLocaleString();
+        document.getElementById('out_cav_gs').innerText = cavGs.count.toLocaleString();
 
-        // 4. Process Siege 
+        document.getElementById('cav_total_units').innerText = cavStats.count.toLocaleString();
+        document.getElementById('cav_upkeep').innerText = cavStats.cu.toLocaleString();
+        document.getElementById('cav_wood').innerText = this.formatNumber(cavStats.w);
+        document.getElementById('cav_clay').innerText = this.formatNumber(cavStats.c);
+        document.getElementById('cav_iron').innerText = this.formatNumber(cavStats.i);
+        document.getElementById('cav_crop').innerText = this.formatNumber(cavStats.cr);
+
+
+        // --- SIEGE ---
         const siegeUnit = document.getElementById('unit_siege').value;
-        const lvlWorkshop = parseInt(document.getElementById('lvl_workshop').value) || 0;
-        calcQueue(siegeUnit, lvlWorkshop, false, 'workshop');
+        const siegeStd = calcLine(siegeUnit, parseInt(document.getElementById('lvl_workshop').value)||0, false);
+        
+        // Update DOM - Siege
+        document.getElementById('out_siege_std').innerText = siegeStd.count.toLocaleString();
+        
+        document.getElementById('siege_total_units').innerText = siegeStd.count.toLocaleString();
+        document.getElementById('siege_upkeep').innerText = siegeStd.cu.toLocaleString();
+        document.getElementById('siege_wood').innerText = this.formatNumber(siegeStd.w);
+        document.getElementById('siege_clay').innerText = this.formatNumber(siegeStd.c);
+        document.getElementById('siege_iron').innerText = this.formatNumber(siegeStd.i);
+        document.getElementById('siege_crop').innerText = this.formatNumber(siegeStd.cr);
 
-        // 5. Update UI - Main Stats
-        document.getElementById('res_total_units').innerText = totalUnits.toLocaleString();
-        document.getElementById('res_total_cost').innerText = this.formatNumber(totalCost);
-        document.getElementById('res_upkeep').innerText = totalUpkeep.toLocaleString();
-        document.getElementById('res_off').innerText = totalOff.toLocaleString();
-        document.getElementById('res_def').innerText = totalDef.toLocaleString();
 
-        // 6. Update UI - Breakdowns
-        document.getElementById('bd_wood').innerText = this.formatNumber(resWood);
-        document.getElementById('bd_clay').innerText = this.formatNumber(resClay);
-        document.getElementById('bd_iron').innerText = this.formatNumber(resIron);
-        document.getElementById('bd_crop').innerText = this.formatNumber(resCrop);
+        // --- GLOBAL TOTALS ---
+        const globalStats = this.sumStats(infStats, cavStats, siegeStd);
+        
+        document.getElementById('global_inf').innerText = infStats.count.toLocaleString();
+        document.getElementById('global_cav').innerText = cavStats.count.toLocaleString();
+        document.getElementById('global_siege').innerText = siegeStd.count.toLocaleString();
+        
+        const totalCost = globalStats.w + globalStats.c + globalStats.i + globalStats.cr;
+        document.getElementById('global_cost').innerText = this.formatNumber(totalCost);
+        document.getElementById('global_upkeep').innerText = globalStats.cu.toLocaleString();
+        
+        document.getElementById('global_off').innerText = globalStats.off.toLocaleString();
+        document.getElementById('global_def').innerText = globalStats.def.toLocaleString();
+    },
 
-        document.getElementById('bd_barracks').innerText = counts.barracks.toLocaleString();
-        document.getElementById('bd_gb').innerText = counts.gb.toLocaleString();
-        document.getElementById('bd_stable').innerText = counts.stable.toLocaleString();
-        document.getElementById('bd_gs').innerText = counts.gs.toLocaleString();
-        document.getElementById('bd_workshop').innerText = counts.workshop.toLocaleString();
+    sumStats: function(...args) {
+        return args.reduce((acc, curr) => {
+            return {
+                count: acc.count + curr.count,
+                w: acc.w + curr.w,
+                c: acc.c + curr.c,
+                i: acc.i + curr.i,
+                cr: acc.cr + curr.cr,
+                cu: acc.cu + curr.cu,
+                off: acc.off + curr.off,
+                def: acc.def + curr.def
+            };
+        }, { count: 0, w:0, c:0, i:0, cr:0, cu:0, off:0, def:0 });
     },
 
     formatNumber: function(num) {
