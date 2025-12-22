@@ -45,7 +45,6 @@
         .unit-select { flex: 2; padding: 10px; font-size: 1rem; border: 1px solid #ccc; border-radius: 4px; font-weight: bold; }
         .helmet-select { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-weight: bold; color: #555; }
 
-        /* Snapshot Input (GREY THEME) */
         .snapshot-row { 
             background: #f5f5f5; padding: 10px; border-radius: 4px; margin-bottom: 15px; 
             border: 1px solid #e0e0e0; display: flex; justify-content: space-between; align-items: center; 
@@ -57,7 +56,6 @@
         .input-row label { font-size: 0.9rem; font-weight: bold; color: #555; }
         .input-row select { width: 70px; padding: 6px; text-align: center; border: 1px solid #ccc; border-radius: 4px; font-weight: bold; }
         
-        /* Projection Row (BLUE-GREY THEME) */
         .projection-row { 
             display: flex; justify-content: space-between; align-items: center; 
             font-size: 0.85rem; color: #455a64; background: #eceff1; 
@@ -74,6 +72,11 @@
 
         /* Global Summary Tiles */
         .results-box { background: #333; color: #fff; padding: 20px; border-radius: 8px; }
+        
+        /* Increased spacing between groups */
+        .summary-group { margin-bottom: 30px; }
+        .summary-group:last-child { margin-bottom: 0; }
+        
         .group-title { font-size: 0.85rem; text-transform: uppercase; color: #859f51; border-bottom: 1px solid #555; padding-bottom: 5px; margin-bottom: 10px; letter-spacing: 1px; font-weight: bold; }
         
         .tiles-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }
@@ -95,12 +98,7 @@
         .c-def { color: #90caf9; }
         .c-upkeep { color: #fdd835 !important; }
 
-        /* Resource Grid - 4 cols on desktop, 2 on mobile */
-        .res-breakdown-grid { 
-            display: grid; 
-            grid-template-columns: repeat(4, 1fr); 
-            gap: 10px; 
-        }
+        .res-breakdown-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
 
         @media (max-width: 600px) {
             .training-grid { grid-template-columns: 1fr; }
@@ -108,10 +106,10 @@
             .helmet-select, .unit-select { width: 100%; }
             .time-bar { flex-direction: column; align-items: stretch; gap: 15px; }
             .time-display { text-align: left; margin-top: 10px; border-top: 1px solid #bbdefb; padding-top: 15px; }
-            /* Mobile response: 2 cols for resources */
+            
+            /* Mobile response: Ensure 2 columns for better readability */
             .res-breakdown-grid { grid-template-columns: 1fr 1fr; } 
-            .footer-tiles { grid-template-columns: 1fr 1fr; }
-            .tiles-grid { grid-template-columns: 1fr 1fr; }
+            .mobile-2col { grid-template-columns: 1fr 1fr !important; }
         }
     </style>
 </head>
@@ -300,7 +298,6 @@
     </div>
 
     <div class="results-box">
-        
         <div class="summary-group">
             <div class="group-title">Projected Army Strength</div>
             <div class="tiles-grid" style="grid-template-columns: repeat(3, 1fr);">
@@ -317,18 +314,18 @@
                     <span class="tile-val" id="global_siege">0</span>
                 </div>
             </div>
-            <div class="tiles-grid" style="margin-top:10px; grid-template-columns: repeat(4, 1fr);">
+            <div class="tiles-grid mobile-2col" style="margin-top:10px; grid-template-columns: repeat(4, 1fr);">
                 <div class="stat-tile">
                     <span class="tile-label">TOTAL OFFENSE</span>
-                    <span class="tile-val c-off" id="global_off">0k</span>
+                    <span class="tile-val c-off" id="global_off">0</span>
                 </div>
                 <div class="stat-tile">
                     <span class="tile-label">DEFENSE VS INFANTRY</span>
-                    <span class="tile-val c-def" id="global_def_inf">0k</span>
+                    <span class="tile-val c-def" id="global_def_inf">0</span>
                 </div>
                 <div class="stat-tile">
                     <span class="tile-label">DEFENSE VS CAVALRY</span>
-                    <span class="tile-val c-def" id="global_def_cav">0k</span>
+                    <span class="tile-val c-def" id="global_def_cav">0</span>
                 </div>
                 <div class="stat-tile">
                     <span class="tile-label">TOTAL UPKEEP</span>
@@ -338,7 +335,7 @@
         </div>
 
         <div class="summary-group">
-            <div class="group-title">Estimated Cost of Growth</div>
+            <div class="group-title">Economics & Logistics</div>
             <div class="res-breakdown-grid">
                  <div class="stat-tile">
                     <span class="tile-label">🌲 WOOD</span>
@@ -357,14 +354,20 @@
                     <span class="tile-val c-crop" id="growth_crop">0</span>
                 </div>
             </div>
-            <div class="tiles-grid" style="margin-top:10px; grid-template-columns: 1fr 1fr;">
+            <div class="tiles-grid mobile-2col" style="margin-top:10px; grid-template-columns: repeat(3, 1fr);">
                 <div class="stat-tile">
-                    <span class="tile-label">TOTAL RESOURCES SPENT</span>
+                    <span class="tile-label">RESOURCES SPENT</span>
                     <span class="tile-val" id="global_growth_cost">0</span>
                 </div>
                 <div class="stat-tile">
-                    <span class="tile-label">TIME SPAN</span>
-                    <span class="tile-val" style="color:#eee;" id="footer_time_span">0d 0h</span>
+                    <span class="tile-label">HAMMER AGE</span>
+                    <span class="tile-val" style="color:#eee;" id="hammer_age">0d 0h</span>
+                    <span class="tile-sub">Cumulative Time</span>
+                </div>
+                <div class="stat-tile">
+                    <span class="tile-label">EST. ANVIL SIZE</span>
+                    <span class="tile-val c-crop" id="anvil_crop">0</span>
+                    <span class="tile-sub">Crop to Defend</span>
                 </div>
             </div>
         </div>

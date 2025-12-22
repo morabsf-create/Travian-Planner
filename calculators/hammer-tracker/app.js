@@ -100,10 +100,7 @@ const HammerApp = {
         const durationSec = diffMs / 1000;
         const days = Math.floor(durationSec / 86400);
         const hours = Math.floor((durationSec % 86400) / 3600);
-        const timeString = `${days}d ${hours}h`;
-        
-        document.getElementById('disp_elapsed').innerText = timeString;
-        document.getElementById('footer_time_span').innerText = timeString;
+        document.getElementById('disp_elapsed').innerText = `${days}d ${hours}h`;
 
         // --- SETTINGS ---
         const tribe = document.getElementById('tribeSelect').value;
@@ -118,8 +115,10 @@ const HammerApp = {
         let globalDefCav = 0;
         let globalUpkeep = 0;
         let globalGrowthCost = 0;
-        
         let gWood = 0, gClay = 0, gIron = 0, gCrop = 0;
+
+        // Variables for Hammer Age (Time to build entire army)
+        let maxBuildTimeSec = 0;
 
         // --- CORE CALC LOGIC ---
         const processSection = (uId, lvlId, lvlGId, snapId, helm, outputTotalId, outputLabelId, projId) => {
@@ -140,9 +139,6 @@ const HammerApp = {
             if(!unitName) {
                 document.getElementById(outputTotalId).innerText = snapshot.toLocaleString();
                 document.getElementById(projId).innerText = "+0";
-                // Even without new troops, snapshot contributes to totals
-                // But we don't know stats if no unit selected!
-                // Assuming 0 stats if no unit selected.
                 return;
             }
 
@@ -154,16 +150,18 @@ const HammerApp = {
                 const buildFactor = SPEED_FACTORS[level] || 1.0;
                 let timePerUnit = (unit.time / speed) * buildFactor * artifact * reductionFactor;
                 if(timePerUnit < 1) timePerUnit = 1;
-                return 1 / timePerUnit; 
+                return 1 / timePerUnit; // units per second
             };
 
             const rateStd = getRate(lvl);
             const rateGr = getRate(lvlG);
             
+            // New Troops
             const producedStd = Math.floor(rateStd * durationSec);
             const producedGr = Math.floor(rateGr * durationSec);
             const totalNew = producedStd + producedGr;
             
+            // Update UI
             document.getElementById(projId).innerText = "+" + totalNew.toLocaleString();
             
             const grandTotal = snapshot + totalNew;
@@ -175,22 +173,25 @@ const HammerApp = {
             globalDefCav += grandTotal * unit.def_cav;
             globalUpkeep += grandTotal * unit.cu;
 
-            // Cost Calculation
-            const wStd = producedStd * unit.wood;
-            const cStd = producedStd * unit.clay;
-            const iStd = producedStd * unit.iron;
-            const crStd = producedStd * unit.crop;
-            
-            const wGr = producedGr * unit.wood * 3;
-            const cGr = producedGr * unit.clay * 3;
-            const iGr = producedGr * unit.iron * 3;
-            const crGr = producedGr * unit.crop * 3;
+            // Cost (Growth Only)
+            const singleCost = unit.wood + unit.clay + unit.iron + unit.crop;
+            const costStd = producedStd * singleCost;
+            const costGr = producedGr * (singleCost * 3);
 
-            gWood += (wStd + wGr);
-            gClay += (cStd + cGr);
-            gIron += (iStd + iGr);
-            gCrop += (crStd + crGr);
-            globalGrowthCost += (wStd + wGr + cStd + cGr + iStd + iGr + crStd + crGr);
+            // Resource Breakdown (Growth)
+            gWood += (producedStd * unit.wood) + (producedGr * unit.wood * 3);
+            gClay += (producedStd * unit.clay) + (producedGr * unit.clay * 3);
+            gIron += (producedStd * unit.iron) + (producedGr * unit.iron * 3);
+            gCrop += (producedStd * unit.crop) + (producedGr * unit.crop * 3);
+            globalGrowthCost += (costStd + costGr);
+
+            // --- Hammer Age Calc ---
+            // Time to build GrandTotal using current infrastructure
+            const totalRate = rateStd + rateGr; 
+            if(totalRate > 0 && grandTotal > 0) {
+                const timeToBuild = grandTotal / totalRate; // Seconds
+                if (timeToBuild > maxBuildTimeSec) maxBuildTimeSec = timeToBuild;
+            }
         };
 
         processSection('unit_infantry', 'lvl_barracks', 'lvl_gb', 'snap_inf', infHelm, 'total_inf', 'lbl_inf', 'proj_inf');
@@ -208,6 +209,18 @@ const HammerApp = {
         document.getElementById('growth_iron').innerText = this.formatNumber(gIron);
         document.getElementById('growth_crop').innerText = this.formatNumber(gCrop);
         document.getElementById('global_growth_cost').innerText = this.formatNumber(globalGrowthCost);
+
+        // Hammer Age
+        const ageDays = Math.floor(maxBuildTimeSec / 86400);
+        const ageHours = Math.floor((maxBuildTimeSec % 86400) / 3600);
+        document.getElementById('hammer_age').innerText = `${ageDays}d ${ageHours}h`;
+
+        // Anvil Size (Approximate)
+        // Teuton Wall L20 = 49% bonus (1.49x)
+        // Avg Anvil Efficiency = 50 Def points per Crop
+        const requiredDefPoints = globalOff / 1.49;
+        const anvilCrop = requiredDefPoints / 50;
+        document.getElementById('anvil_crop').innerText = this.formatPoints(anvilCrop);
     },
 
     formatNumber: function(num) {
