@@ -71,7 +71,7 @@ const TroopApp = {
         const artifact = parseFloat(document.getElementById('artifact').value);
         const allyBonus = parseFloat(document.getElementById('allyBonus').value); 
 
-        // Specific Helmet Bonuses
+        // Specific Helmet Bonuses (Now inside specific cards)
         const helmetInf = parseFloat(document.getElementById('inf_helmet').value) || 0;
         const helmetCav = parseFloat(document.getElementById('cav_helmet').value) || 0;
 
@@ -108,11 +108,12 @@ const TroopApp = {
         };
 
         // --- INFANTRY (Uses inf_helmet) ---
-        const infUnit = document.getElementById('unit_infantry').value;
-        const infStd = calcLine(infUnit, parseInt(document.getElementById('lvl_barracks').value)||0, false, helmetInf);
-        const infGb  = calcLine(infUnit, parseInt(document.getElementById('lvl_gb').value)||0, true, helmetInf);
+        const infUnitName = document.getElementById('unit_infantry').value;
+        const infStd = calcLine(infUnitName, parseInt(document.getElementById('lvl_barracks').value)||0, false, helmetInf);
+        const infGb  = calcLine(infUnitName, parseInt(document.getElementById('lvl_gb').value)||0, true, helmetInf);
         const infStats = this.sumStats(infStd, infGb);
         
+        // Update DOM - Infantry
         document.getElementById('out_inf_std').innerText = infStd.count.toLocaleString();
         document.getElementById('out_inf_gb').innerText = infGb.count.toLocaleString();
         
@@ -122,11 +123,15 @@ const TroopApp = {
         document.getElementById('inf_clay').innerText = this.formatNumber(infStats.c);
         document.getElementById('inf_iron').innerText = this.formatNumber(infStats.i);
         document.getElementById('inf_crop').innerText = this.formatNumber(infStats.cr);
+        
+        // Dynamic Label for Global Summary
+        document.getElementById('lbl_inf').innerText = infUnitName ? infUnitName.toUpperCase() : "INFANTRY";
+
 
         // --- CAVALRY (Uses cav_helmet) ---
-        const cavUnit = document.getElementById('unit_cavalry').value;
-        const cavStd = calcLine(cavUnit, parseInt(document.getElementById('lvl_stable').value)||0, false, helmetCav);
-        const cavGs  = calcLine(cavUnit, parseInt(document.getElementById('lvl_gs').value)||0, true, helmetCav);
+        const cavUnitName = document.getElementById('unit_cavalry').value;
+        const cavStd = calcLine(cavUnitName, parseInt(document.getElementById('lvl_stable').value)||0, false, helmetCav);
+        const cavGs  = calcLine(cavUnitName, parseInt(document.getElementById('lvl_gs').value)||0, true, helmetCav);
         const cavStats = this.sumStats(cavStd, cavGs);
         
         document.getElementById('out_cav_std').innerText = cavStd.count.toLocaleString();
@@ -139,9 +144,13 @@ const TroopApp = {
         document.getElementById('cav_iron').innerText = this.formatNumber(cavStats.i);
         document.getElementById('cav_crop').innerText = this.formatNumber(cavStats.cr);
 
+        // Dynamic Label
+        document.getElementById('lbl_cav').innerText = cavUnitName ? cavUnitName.toUpperCase() : "CAVALRY";
+
+
         // --- SIEGE (No helmet) ---
-        const siegeUnit = document.getElementById('unit_siege').value;
-        const siegeStd = calcLine(siegeUnit, parseInt(document.getElementById('lvl_workshop').value)||0, false, 0); // 0% Helmet
+        const siegeUnitName = document.getElementById('unit_siege').value;
+        const siegeStd = calcLine(siegeUnitName, parseInt(document.getElementById('lvl_workshop').value)||0, false, 0); // 0% Helmet
         
         document.getElementById('out_siege_std').innerText = siegeStd.count.toLocaleString();
         
@@ -151,6 +160,10 @@ const TroopApp = {
         document.getElementById('siege_clay').innerText = this.formatNumber(siegeStd.c);
         document.getElementById('siege_iron').innerText = this.formatNumber(siegeStd.i);
         document.getElementById('siege_crop').innerText = this.formatNumber(siegeStd.cr);
+
+        // Dynamic Label
+        document.getElementById('lbl_siege').innerText = siegeUnitName ? siegeUnitName.toUpperCase() : "SIEGE";
+
 
         // --- GLOBAL TOTALS ---
         const globalStats = this.sumStats(infStats, cavStats, siegeStd);
