@@ -277,4 +277,86 @@
                 <div class="footer-tiles">
                     <div class="mini-tile"><label>Wood</label><span id="siege_wood">0</span></div>
                     <div class="mini-tile"><label>Clay</label><span id="siege_clay">0</span></div>
-                    <div class="mini
+                    <div class="mini-tile"><label>Iron</label><span id="siege_iron">0</span></div>
+                    <div class="mini-tile"><label>Crop</label><span id="siege_crop">0</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="results-box">
+        
+        <div class="summary-group">
+            <div class="group-title">Army Strength & Power</div>
+            <div class="tiles-grid">
+                <div class="stat-tile">
+                    <span class="tile-label" id="lbl_inf">INFANTRY</span>
+                    <span class="tile-val" id="global_inf">0</span>
+                </div>
+                <div class="stat-tile">
+                    <span class="tile-label" id="lbl_cav">CAVALRY</span>
+                    <span class="tile-val" id="global_cav">0</span>
+                </div>
+                <div class="stat-tile">
+                    <span class="tile-label" id="lbl_siege">SIEGE</span>
+                    <span class="tile-val" id="global_siege">0</span>
+                </div>
+                <div class="stat-tile">
+                    <span class="tile-label">OFFENSE</span>
+                    <span class="tile-val c-off" id="global_off">0</span>
+                </div>
+                <div class="stat-tile">
+                    <span class="tile-label">DEFENSE</span>
+                    <span class="tile-val c-def" id="global_def">0</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="summary-group">
+            <div class="group-title">Economics Overview</div>
+            <div class="tiles-grid" style="grid-template-columns: repeat(3, 1fr);">
+                <div class="stat-tile">
+                    <span class="tile-label">TOTAL UPKEEP</span>
+                    <span class="tile-val c-upkeep"><span id="global_upkeep">0</span>/h</span>
+                </div>
+                <div class="stat-tile">
+                    <span class="tile-label">TOTAL COST</span>
+                    <span class="tile-val" id="global_cost">0</span>
+                </div>
+                <div class="stat-tile">
+                    <span class="tile-label">SUPPLY VILLAGES</span>
+                    <span class="tile-val" style="color:#e0e0e0;" id="global_push_villages">0</span>
+                    <span class="tile-sub">L10 Fields + Plus</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="summary-group">
+            <div class="group-title">Resource Breakdown</div>
+            <div class="res-breakdown-grid">
+                 <div class="stat-tile">
+                    <span class="tile-label">🌲 WOOD</span>
+                    <span class="tile-val c-wood" id="gc_wood">0</span>
+                </div>
+                 <div class="stat-tile">
+                    <span class="tile-label">🧱 CLAY</span>
+                    <span class="tile-val c-clay" id="gc_clay">0</span>
+                </div>
+                 <div class="stat-tile">
+                    <span class="tile-label">⚒️ IRON</span>
+                    <span class="tile-val c-iron" id="gc_iron">0</span>
+                </div>
+                 <div class="stat-tile">
+                    <span class="tile-label">🌾 CROP</span>
+                    <span class="tile-val c-crop" id="gc_crop">0</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
